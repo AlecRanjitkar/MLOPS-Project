@@ -7,7 +7,7 @@ We will be using Fashion-MNIST dataset to classify images of clothing items. Eac
 For the modeling part, the project will begin with simple baseline models, such as a multilayer perceptron (MLP), to establish a reference performance. After that, a small convolutional neural network (CNN) will be implemented to better capture the spatial structure of the image data. All models will be implemented in PyTorch, and key hyperparameters like learning rate, batch size, and number of training epochs will be specified through configuration files instead of being hardcoded. Training and evaluation metrics will be logged using an experiment tracking tool, which makes it easier to compare different model setups and data versions throughout the project.
 
 Dataset link: https://www.kaggle.com/datasets/zalando-research/fashionmnist
-<img width="499" height="464" alt="image" src="https://github.com/user-attachments/assets/457b55ec-07d2-4957-b580-6d20478facf4" />
+
 
 
 ## Project structure
@@ -56,8 +56,3 @@ The directory structure of the project looks like this:
 ├── requirements_dev.txt      # Development requirements
 └── tasks.py                  # Project tasks
 ```
-
-
-Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
-a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
-started with Machine Learning Operations (MLOps).
