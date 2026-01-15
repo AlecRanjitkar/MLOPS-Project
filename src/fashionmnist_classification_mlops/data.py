@@ -65,7 +65,7 @@ def preprocess(
     train_images = torch.stack([train_ds[i][0] for i in range(len(train_ds))])  # (60000,1,28,28)
     train_labels = torch.tensor([train_ds[i][1] for i in range(len(train_ds))], dtype=torch.long)
 
-    test_images = torch.stack([test_ds[i][0] for i in range(len(test_ds))])     # (10000,1,28,28)
+    test_images = torch.stack([test_ds[i][0] for i in range(len(test_ds))])  # (10000,1,28,28)
     test_labels = torch.tensor([test_ds[i][1] for i in range(len(test_ds))], dtype=torch.long)
 
     logger.info(f"Loaded train: images={train_images.shape}, labels={train_labels.shape}")
