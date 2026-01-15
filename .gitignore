@@ -1,5 +1,8 @@
 # Project data (generated locally)
-/data
+# Ignore data contents but allow DVC metafiles
+data/*
+!data/*.dvc
+
 
 docs/site/
 
