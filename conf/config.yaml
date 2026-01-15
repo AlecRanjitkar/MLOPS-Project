@@ -1,0 +1,15 @@
+defaults:
+  - _self_
+  - experiments: exp1
+
+
+hyperparameters:
+  batch_size: 64
+  learning_rate: 0.001
+  epochs: 5
+
+model:
+  type: cnn
+
+seed: 42
+

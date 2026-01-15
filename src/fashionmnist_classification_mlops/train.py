@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-
+import hydra
+from omegaconf import DictConfig
 import matplotlib.pyplot as plt
 import torch
-import typer
 from loguru import logger
 
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
@@ -117,5 +117,19 @@ def train(
     logger.success(f"Saved plots to: {fig_out.parent}")
 
 
+@hydra.main(version_base=None, config_path="../../conf", config_name="config")
+def main(cfg: DictConfig) -> None:
+    train(
+        lr=cfg.hyperparameters.learning_rate,
+        batch_size=cfg.hyperparameters.batch_size,
+        epochs=cfg.hyperparameters.epochs,
+        model_type=cfg.model.type,
+        processed_dir=Path("data/processed"),
+        model_out=Path("models/model.pth"),
+        fig_out=Path("reports/figures/training_statistics.png"),
+    )
+
+
+
 if __name__ == "__main__":
-    typer.run(train)
+    main()
