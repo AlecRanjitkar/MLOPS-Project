@@ -40,7 +40,6 @@ dvc-render==1.0.2
 dvc-studio-client==0.22.0
 dvc-task==0.40.2
 entrypoints==0.4
--e git+https://github.com/AlecRanjitkar/MLOPS-Project.git@1984be878b62320204730179274e45566a606360#egg=fashionmnist_classification_mlops
 filelock==3.20.2
 flatten-dict==0.4.2
 flufl.lock==9.0.0
