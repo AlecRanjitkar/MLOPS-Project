@@ -2,6 +2,8 @@
 # Ignore data contents but allow DVC metafiles
 data/*
 !data/*.dvc
+models/
+
 
 
 docs/site/
