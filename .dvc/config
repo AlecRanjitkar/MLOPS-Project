@@ -1,7 +1,10 @@
 [core]
-    remote = gdrive_remote
-
-[remote "gdrive_remote"]
+    remote = myremote
+['remote "gdrive_remote"']
     url = gdrive://14NGcHah3njWKrweptFbcFUjjquB3eRzN
     gdrive_client_id = ""
     gdrive_client_secret = ""
+['remote "gcsremote"']
+    url = gs://mlops-project-484413-dvc/dvcstore
+['remote "myremote"']
+    url = gs://mlops-project-484413-dvc

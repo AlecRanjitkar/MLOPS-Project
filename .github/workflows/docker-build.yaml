@@ -1,0 +1,21 @@
+name: Build Docker Images
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build train
+        run: docker build -f dockerfiles/train.dockerfile -t train:latest .
+
+      - name: Build evaluate
+        run: docker build -f dockerfiles/evaluate.dockerfile -t evaluate:latest .
+
+      - name: Build api
+        run: docker build -f dockerfiles/api.dockerfile -t api:latest .
