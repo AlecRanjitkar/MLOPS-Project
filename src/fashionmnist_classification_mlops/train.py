@@ -6,6 +6,10 @@ from omegaconf import DictConfig
 import matplotlib.pyplot as plt
 import torch
 from loguru import logger
+import os
+import cProfile
+import pstats
+
 
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
 
@@ -23,8 +27,9 @@ def load_processed(processed_dir: Path) -> tuple[torch.utils.data.Dataset, torch
     return train_set, test_set
 
 
-def accuracy_from_logits(logits: torch.Tensor, y: torch.Tensor) -> float:
-    return (logits.argmax(dim=1) == y).float().mean().item()
+def accuracy_from_logits(logits: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    return (logits.argmax(dim=1) == y).float().mean()
+
 
 
 def train(
@@ -70,13 +75,17 @@ def train(
             loss.backward()
             optimizer.step()
 
-            acc = accuracy_from_logits(logits, y)
+            acc_t = accuracy_from_logits(logits, y)
 
-            stats["train_loss"].append(loss.item())
-            stats["train_acc"].append(acc)
+            stats["train_loss"].append(loss.detach())
+            stats["train_acc"].append(acc_t.detach())
 
             if i % 200 == 0:
-                logger.info(f"epoch={epoch} step={i} loss={loss.item():.4f} acc={acc:.4f}")
+                logger.info(
+                    f"epoch={epoch} step={i} "
+                    f"loss={loss.detach().item():.4f} acc={acc_t.detach().item():.4f}"
+                )
+
 
         # Evaluate after each epoch
         model.eval()
@@ -95,15 +104,19 @@ def train(
     torch.save(model.state_dict(), model_out)
     logger.success(f"Saved model to: {model_out}")
 
+    train_loss = [x.item() for x in stats["train_loss"]]
+    train_acc = [x.item() for x in stats["train_acc"]]
+
+
     # Save training curves (M6 requirement) :contentReference[oaicite:8]{index=8}
     plt.figure(figsize=(12, 4))
-    plt.plot(stats["train_loss"])
+    plt.plot(train_loss)
     plt.title("Train loss")
     plt.savefig(fig_out.parent / "train_loss.png")
     plt.close()
 
     plt.figure(figsize=(12, 4))
-    plt.plot(stats["train_acc"])
+    plt.plot(train_acc)
     plt.title("Train accuracy (per step)")
     plt.savefig(fig_out.parent / "train_accuracy.png")
     plt.close()
@@ -119,6 +132,14 @@ def train(
 
 @hydra.main(version_base=None, config_path="../../conf", config_name="config")
 def main(cfg: DictConfig) -> None:
+    # Turn profiling on/off with an env var:
+    # PROFILE=1 python src/.../train.py
+    do_profile = os.getenv("PROFILE", "0") == "1"
+
+    if do_profile:
+        pr = cProfile.Profile()
+        pr.enable()
+
     train(
         lr=cfg.hyperparameters.learning_rate,
         batch_size=cfg.hyperparameters.batch_size,
@@ -128,6 +149,22 @@ def main(cfg: DictConfig) -> None:
         model_out=Path("models/model.pth"),
         fig_out=Path("reports/figures/training_statistics.png"),
     )
+
+    if do_profile:
+        pr.disable()
+
+        # Print top functions by cumulative time (M13)
+        stats = pstats.Stats(pr).strip_dirs().sort_stats("cumtime")
+        stats.print_stats(40)
+
+        # Also useful to see "self time"
+        stats = pstats.Stats(pr).strip_dirs().sort_stats("tottime")
+        stats.print_stats(40)
+
+        # Save profile in the CURRENT working dir (Hydra run dir)
+        pstats.Stats(pr).dump_stats("profile.pstats")
+        print("Saved profile to: profile.pstats")
+
 
 
 
