@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code and data
 COPY src/ ./src/
 COPY data/processed/ ./data/processed/
+COPY conf/ ./conf/
 COPY pyproject.toml .
 
 # Install the package

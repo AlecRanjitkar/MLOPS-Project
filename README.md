@@ -56,3 +56,26 @@ The directory structure of the project looks like this:
 ├── requirements_dev.txt      # Development requirements
 └── tasks.py                  # Project tasks
 ```
+
+
+
+
+# Setup Project
+
+First clone project from github, the run these:
+
+```bash
+pip install dvc # Remember to have docker installed and ready
+
+pip install dvc-gdrive
+
+dvc pull # Pulls data
+```
+
+Then train model:
+
+```bash
+docker-compose run --rm train                                               
+docker-compose run --rm evaluate
+docker-compose up api
+```
