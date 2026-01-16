@@ -1,0 +1,27 @@
+program: fashionmnist_classification_mlops.sweep_runner
+method: random
+
+metric:
+  name: epoch/test_acc
+  goal: maximize
+
+parameters:
+  lr:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.01
+  batch_size:
+    values: [32, 64, 128]
+  epochs:
+    values: [3, 5, 8]
+  model:
+    values: ["cnn", "mlp"]
+
+run_cap: 10
+
+command:
+  - ${env}
+  - ${interpreter}
+  - -m
+  - ${program}
+  - ${args}
