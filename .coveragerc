@@ -1,0 +1,14 @@
+[run]
+source =
+    fashionmnist_classification_mlops
+omit =
+    tests/*
+    */__init__.py
+    */train.py
+    */api.py
+    */visualize.py
+    */evaluate.py
+
+[report]
+exclude_lines =
+    if __name__ == .__main__.:
