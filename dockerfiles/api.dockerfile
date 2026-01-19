@@ -11,11 +11,13 @@ RUN pip install fastapi uvicorn[standard] python-multipart pillow
 
 # Copy source code and trained model
 COPY src/ ./src/
-COPY models/model.pth ./models/model.pth
 COPY pyproject.toml .
 
 # Install the package
 RUN pip install -e .
+
+# Create models directory
+RUN mkdir -p models
 
 # Expose port
 EXPOSE 8000

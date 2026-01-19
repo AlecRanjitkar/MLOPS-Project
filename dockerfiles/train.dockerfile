@@ -8,7 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code and data
 COPY src/ ./src/
-COPY data/processed/ ./data/processed/
 COPY conf/ ./conf/
 COPY pyproject.toml .
 
@@ -16,7 +15,7 @@ COPY pyproject.toml .
 RUN pip install -e .
 
 # Create directories for outputs
-RUN mkdir -p models reports/figures
+RUN mkdir -p models reports/figures data/processed
 
 # Set environment variable to avoid MPS on non-Mac systems
 ENV PYTORCH_ENABLE_MPS_FALLBACK=1
