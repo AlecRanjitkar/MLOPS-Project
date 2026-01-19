@@ -1,3 +1,34 @@
+########################################
+# Weights & Biases (wandb)
+########################################
+wandb/
+**/wandb/
+
+# WandB local artifacts & metadata
+*.wandb
+wandb-debug.log
+wandb-debug-internal.log
+
+########################################
+# Hydra outputs
+########################################
+outputs/
+multirun/
+.hydra/
+
+########################################
+# Generated reports & figures
+########################################
+reports/figures/*
+!reports/figures/.gitkeep
+
+########################################
+# Trained models (unless explicitly versioned)
+########################################
+models/*
+!models/.gitkeep
+
+
 # Project data (generated locally)
 # Ignore data contents but allow DVC metafiles
 data/*
