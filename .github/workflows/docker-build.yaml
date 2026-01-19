@@ -27,13 +27,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert repository name to lowercase
+        id: repo_name
+        run: echo "REPO_LOWERCASE=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build and push train
         uses: docker/build-push-action@v6
         with:
           context: .
           file: dockerfiles/train.dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/train:latest
+          tags: ghcr.io/${{ steps.repo_name.outputs.REPO_LOWERCASE }}/train:latest
 
       - name: Build and push evaluate
         uses: docker/build-push-action@v6
@@ -41,7 +45,7 @@ jobs:
           context: .
           file: dockerfiles/evaluate.dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/evaluate:latest
+          tags: ghcr.io/${{ steps.repo_name.outputs.REPO_LOWERCASE }}/evaluate:latest
 
       - name: Build and push api
         uses: docker/build-push-action@v6
@@ -49,4 +53,4 @@ jobs:
           context: .
           file: dockerfiles/api.dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository }}/api:latest
+          tags: ghcr.io/${{ steps.repo_name.outputs.REPO_LOWERCASE }}/api:latest
