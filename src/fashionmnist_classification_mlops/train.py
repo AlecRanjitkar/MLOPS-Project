@@ -20,11 +20,7 @@ from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
 # -----------------------------
 # Constants / utilities
 # -----------------------------
-DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available() else
-    "mps" if torch.backends.mps.is_available() else
-    "cpu"
-)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 
 def ensure_channel_dim(x: torch.Tensor) -> torch.Tensor:
@@ -144,7 +140,7 @@ def train(
     load_dotenv()  # optional; uses WANDB_* from .env if present
     run = wandb.init(
         project=None,  # can be set via WANDB_PROJECT env var
-        entity=None,   # can be set via WANDB_ENTITY env var
+        entity=None,  # can be set via WANDB_ENTITY env var
         job_type="train",
         config={
             "lr": lr,
@@ -193,8 +189,7 @@ def train(
             # Log every N steps
             if global_step % log_every_steps == 0:
                 logger.info(
-                    f"epoch={epoch} step={global_step} batch={batch_idx} "
-                    f"loss={loss.item():.4f} acc={step_acc:.4f}"
+                    f"epoch={epoch} step={global_step} batch={batch_idx} loss={loss.item():.4f} acc={step_acc:.4f}"
                 )
                 wandb.log(
                     {"train/loss": loss.item(), "train/acc": step_acc, "epoch": epoch},

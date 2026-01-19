@@ -2,6 +2,7 @@ import os
 import sys
 from loguru import logger
 
+
 def setup_logger(log_dir: str = "logs", level: str = "INFO") -> None:
     os.makedirs(log_dir, exist_ok=True)
 
