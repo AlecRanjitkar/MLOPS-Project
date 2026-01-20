@@ -38,6 +38,8 @@ jobs:
           file: dockerfiles/train.dockerfile
           push: true
           tags: ghcr.io/${{ steps.repo_name.outputs.REPO_LOWERCASE }}/train:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push evaluate
         uses: docker/build-push-action@v6
@@ -46,6 +48,8 @@ jobs:
           file: dockerfiles/evaluate.dockerfile
           push: true
           tags: ghcr.io/${{ steps.repo_name.outputs.REPO_LOWERCASE }}/evaluate:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push api
         uses: docker/build-push-action@v6
@@ -54,3 +58,5 @@ jobs:
           file: dockerfiles/api.dockerfile
           push: true
           tags: ghcr.io/${{ steps.repo_name.outputs.REPO_LOWERCASE }}/api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
