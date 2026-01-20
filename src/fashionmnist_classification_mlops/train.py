@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
+import os
+import cProfile
+import pstats
 
 import hydra
 import matplotlib.pyplot as plt
@@ -253,6 +256,14 @@ def main(cfg: DictConfig) -> None:
     logger.info("Hydra config loaded:")
     logger.info(OmegaConf.to_yaml(cfg))
 
+    # PROFILE=1 python -m fashionmnist_classification_mlops.train
+    do_profile = os.getenv("PROFILE", "0") == "1"
+
+    if do_profile:
+        pr = cProfile.Profile()
+        pr.enable()
+        logger.info("Profiling enabled")
+
     train(
         lr=float(cfg.hyperparameters.learning_rate),
         batch_size=int(cfg.hyperparameters.batch_size),
@@ -263,6 +274,24 @@ def main(cfg: DictConfig) -> None:
         figures_dir=Path("reports/figures"),
         log_every_steps=200,
     )
+
+    if do_profile:
+        pr.disable()
+
+        logger.info("Profiling results (cumulative time):")
+        stats = pstats.Stats(pr).strip_dirs().sort_stats("cumtime")
+        stats.print_stats(40)
+
+        # Also useful to see "self time"
+        logger.info("Profiling results (total time):")
+        stats = pstats.Stats(pr).strip_dirs().sort_stats("tottime")
+        stats.print_stats(40)
+
+        # Save profile in the reports/profiler directory
+        profile_path = Path("reports/profiler/train_profile.pstats")
+        profile_path.parent.mkdir(parents=True, exist_ok=True)
+        pstats.Stats(pr).dump_stats(str(profile_path))
+        logger.success(f"Saved profile to: {profile_path}")
 
 
 if __name__ == "__main__":
