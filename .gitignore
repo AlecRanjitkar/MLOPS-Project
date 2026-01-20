@@ -17,12 +17,6 @@ multirun/
 .hydra/
 
 ########################################
-# Generated reports & figures
-########################################
-reports/figures/*
-!reports/figures/.gitkeep
-
-########################################
 # Trained models (unless explicitly versioned)
 ########################################
 models/*
@@ -34,7 +28,6 @@ models/*
 data/*
 !data/*.dvc
 models/
-reports/
 
 
 
