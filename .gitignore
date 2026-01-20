@@ -17,6 +17,12 @@ multirun/
 .hydra/
 
 ########################################
+# Profiling outputs
+########################################
+*.pstats
+reports/profiler/*.pstats
+
+########################################
 # Trained models (unless explicitly versioned)
 ########################################
 models/*
