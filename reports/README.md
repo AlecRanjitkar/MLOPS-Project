@@ -57,11 +57,9 @@ uv add typer markdown
 >
 > Example:
 >
-> s205414, s205427, and s205460
->
 > Answer:
 
---- question 2 fill here ---
+s205414, s205427, and s205460
 
 ### Question 3
 
@@ -92,7 +90,15 @@ uv add typer markdown
 >
 > Answer:
 
---- question 4 fill here ---
+We used requirements.txt for managing our project dependencies with pinned versions (e.g., torch>=2.0.0). We also maintain a requirements_dev.txt file for development specific tools. The project is installable as a package using pyproject.toml. To get a complete copy of our development environment this is what users need to do: 
+- (1) Clone the repository,
+- (2) Create a virtual environment: `python -m venv .venv`, 
+- (3) Activate it: `source .venv/bin/activate`, 
+- (4) Install dependencies: `pip install -r requirements.txt` and `pip install -r requirements_dev.txt`, 
+- (5) Install the package in editable mode: `pip install -e .`,
+- (6) Install DVC with remote storage: `pip install dvc dvc-gdrive`,
+- (7) Pull versioned data: `dvc pull` (requires DVC remote configuration with Google Drive credentials). 
+This ensures reproducible environments across all team members.
 
 ### Question 5
 
@@ -105,7 +111,7 @@ uv add typer markdown
 >
 > Answer:
 
---- question 5 fill here ---
+From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `reports/`, and `tests/` folders. The `src/fashionmnist_classification_mlops/` folder contains our main code including `train.py`, `model.py`, `data.py`, `evaluate.py`, and `api.py`. We added a `conf/` folder for Hydra configuration files to manage hyperparameters and experiments. We also added a `dockerfiles/` folder containing three Dockerfiles (train, evaluate, and api) for containerization. We created `.github/workflows/` for CI/CD pipelines including automated testing and Docker image building. The `reports/profiler/` folder stores profiling results for performance analysis. Overall, we maintained the template structure while extending it with modern MLOps tooling.
 
 ### Question 6
 
