@@ -10,7 +10,6 @@ RUN pip install --no-cache-dir -r requirements-docker.txt
 
 # Copy source code and model
 COPY src/ src/
-COPY models/model.pth models/model.pth
 
 # Install the project
 RUN pip install --no-cache-dir -e .

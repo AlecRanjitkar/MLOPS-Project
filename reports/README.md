@@ -90,15 +90,16 @@ s205414, s205427, and s205460
 >
 > Answer:
 
-We used requirements.txt for managing our project dependencies with pinned versions (e.g., torch>=2.0.0). We also maintain a requirements_dev.txt file for development specific tools. The project is installable as a package using pyproject.toml. To get a complete copy of our development environment this is what users need to do: 
+We used requirements.txt for managing our project dependencies with pinned versions (e.g., torch>=2.0.0). We also maintain a requirements_dev.txt file for development specific tools. The project is installable as a package using pyproject.toml. To get a complete copy of our development environment this is what users need to do:
+
 - (1) Clone the repository,
-- (2) Create a virtual environment: `python -m venv .venv`, 
-- (3) Activate it: `source .venv/bin/activate`, 
-- (4) Install dependencies: `pip install -r requirements.txt` and `pip install -r requirements_dev.txt`, 
+- (2) Create a virtual environment: `python -m venv .venv`,
+- (3) Activate it: `source .venv/bin/activate`,
+- (4) Install dependencies: `pip install -r requirements.txt` and `pip install -r requirements_dev.txt`,
 - (5) Install the package in editable mode: `pip install -e .`,
 - (6) Install DVC with remote storage: `pip install dvc dvc-gdrive`,
-- (7) Pull versioned data: `dvc pull` (requires DVC remote configuration with Google Drive credentials). 
-This ensures reproducible environments across all team members.
+- (7) Pull versioned data: `dvc pull` (requires DVC remote configuration with Google Drive credentials).
+  This ensures reproducible environments across all team members.
 
 ### Question 5
 
@@ -302,7 +303,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 19 fill here ---
+![my_image](figures/bucket.png)
 
 ### Question 20
 
@@ -318,7 +319,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 21 fill here ---
+![my_image](figures/build.png)
 
 ### Question 22
 

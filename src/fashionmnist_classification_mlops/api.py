@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import io
+import os
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
 import torch
 from fastapi import FastAPI, File, HTTPException, UploadFile
+from google.cloud import storage
 from PIL import Image
 from torchvision import transforms
 
@@ -13,11 +16,13 @@ from fashionmnist_classification_mlops.model import FashionCNN
 
 # Metrics tracking
 request_count = 0
-prediction_times = []
+prediction_times: list[float] = []
 
 app = FastAPI(title="Fashion-MNIST Classifier API")
 
+MODEL_LOADED = False
 MODEL_PATH = Path("models/model.pth")
+MODEL_URI = os.getenv("MODEL_URI")  # e.g. gs://mlops-project-484413-dvc/models/model.pth
 DEVICE = torch.device("cpu")
 model = FashionCNN().to(DEVICE)
 
@@ -44,26 +49,52 @@ transform = transforms.Compose(
 )
 
 
+def _download_from_gcs(gs_uri: str, dest: Path) -> None:
+    """Download a GCS object (gs://bucket/path) to dest."""
+    parsed = urlparse(gs_uri)
+    if parsed.scheme != "gs":
+        raise ValueError(f"MODEL_URI must be a gs:// URI, got: {gs_uri}")
+
+    bucket_name = parsed.netloc
+    blob_name = parsed.path.lstrip("/")
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    blob = bucket.blob(blob_name)
+
+    if not blob.exists(client):
+        raise FileNotFoundError(f"GCS object not found: {gs_uri}")
+
+    blob.download_to_filename(str(dest))
+
+
 @app.on_event("startup")
 async def load_model() -> None:
+    global MODEL_LOADED
+    MODEL_LOADED = False
     try:
         if not MODEL_PATH.exists():
-            print(f"WARNING: Model not found at {MODEL_PATH}")
+            print(f"Model not found locally at {MODEL_PATH}")
             print(f"Current directory: {Path.cwd()}")
 
-            if Path("models").exists():
-                model_files = list(Path("models").glob("*"))
-            else:
-                model_files = "models/ does not exist"
+            if not MODEL_URI:
+                print("MODEL_URI env var not set, cannot download model from GCS.")
+                return
 
-            print(f"Files in models/: {model_files}")
-            return
+            print(f"Downloading model from {MODEL_URI} -> {MODEL_PATH}")
+            _download_from_gcs(MODEL_URI, MODEL_PATH)
+            print("Download complete.")
 
         print(f"Loading model from {MODEL_PATH}")
         state = torch.load(MODEL_PATH, map_location=DEVICE, weights_only=True)
         model.load_state_dict(state)
         model.eval()
+
+        MODEL_LOADED = True
         print("Model loaded successfully!")
+
     except Exception as e:
         print(f"ERROR loading model: {e}")
         import traceback
@@ -75,17 +106,16 @@ async def load_model() -> None:
 async def root():
     return {
         "message": "Fashion-MNIST Classifier API",
-        "model_loaded": MODEL_PATH.exists(),
+        "model_loaded": MODEL_LOADED,
         "classes": CLASS_NAMES,
     }
 
 
 @app.get("/health")
 async def health():
-    """Health check endpoint for monitoring."""
     return {
-        "status": "healthy" if MODEL_PATH.exists() else "degraded",
-        "model_loaded": MODEL_PATH.exists(),
+        "status": "healthy" if MODEL_LOADED else "degraded",
+        "model_loaded": MODEL_LOADED,
         "model_path": str(MODEL_PATH),
     }
 
@@ -113,8 +143,8 @@ async def predict(file: UploadFile = File(...)):
     global request_count
     request_count += 1
 
-    if not MODEL_PATH.exists():
-        raise HTTPException(status_code=503, detail=f"Model not found at {MODEL_PATH}")
+    if not MODEL_LOADED:
+        raise HTTPException(status_code=503, detail=f"Model not loaded (expected at {MODEL_PATH})")
 
     start_time = time.time()
 
