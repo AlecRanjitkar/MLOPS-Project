@@ -71,7 +71,6 @@ async def load_model() -> None:
         traceback.print_exc()
 
 
-
 @app.get("/")
 async def root():
     return {
