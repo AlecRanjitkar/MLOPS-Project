@@ -22,8 +22,7 @@ def test_model_forward_shape(model_cls, input_shape):
     y = model(x)
 
     assert y.shape == (input_shape[0], num_classes), (
-        f"Expected output shape ({input_shape[0]}, {num_classes}), "
-        f"got {tuple(y.shape)}"
+        f"Expected output shape ({input_shape[0]}, {num_classes}), got {tuple(y.shape)}"
     )
 
 
@@ -42,6 +41,8 @@ def test_model_accepts_float_tensor():
 
     y = model(x)
     assert y.dtype == torch.float32, "Output dtype mismatch"
+
+
 def test_cnn_output_shape():
     """Test CNN model outputs correct shape."""
     model = FashionCNN()
@@ -63,12 +64,12 @@ def test_model_inference_speed():
     model = FashionCNN()
     model.eval()
     x = torch.randn(1, 1, 28, 28)
-    
+
     start = time.time()
     with torch.no_grad():
         _ = model(x)
     duration = time.time() - start
-    
+
     assert duration < 1.0, f"Model inference took {duration:.3f}s, expected < 1.0s"
 
 
@@ -77,8 +78,8 @@ def test_model_no_nan_outputs():
     model = FashionCNN()
     model.eval()
     x = torch.randn(2, 1, 28, 28)
-    
+
     with torch.no_grad():
         output = model(x)
-    
+
     assert not torch.isnan(output).any(), "Model produced NaN values"
