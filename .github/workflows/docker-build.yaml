@@ -21,18 +21,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install -e .
 
-      - name: Prepare data
+      - name: Prepare data and train model
+        env:
+          WANDB_MODE: offline
         run: |
           python -m fashionmnist_classification_mlops.data data/raw data/processed
-
-      - name: Train model
-        run: |
           python -m fashionmnist_classification_mlops.train
           ls -la models/
 
