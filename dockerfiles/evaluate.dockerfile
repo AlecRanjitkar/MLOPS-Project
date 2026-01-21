@@ -11,15 +11,14 @@ RUN pip install scikit-learn matplotlib
 
 # Copy source code, data, and model
 COPY src/ ./src/
-COPY data/processed/ ./data/processed/
-COPY models/model.pth ./models/model.pth
+COPY conf/ ./conf/
 COPY pyproject.toml .
 
 # Install the package
 RUN pip install -e .
 
 # Create output directory for reports
-RUN mkdir -p reports/figures
+RUN mkdir -p reports/figures models data/processed
 
 # Set environment variable
 ENV PYTORCH_ENABLE_MPS_FALLBACK=1
