@@ -10,13 +10,14 @@ from typing import Any
 import hydra
 import matplotlib.pyplot as plt
 import torch
+import wandb
 from dotenv import load_dotenv
 from loguru import logger
 from omegaconf import DictConfig, OmegaConf
 
-import wandb
 from fashionmnist_classification_mlops.logging_utils import setup_logger
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
+
 
 # -----------------------------
 # Constants / utilities
