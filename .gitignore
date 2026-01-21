@@ -35,8 +35,8 @@ data/*
 !data/*.dvc
 models/
 
-
-
+# Generated reports
+reports/drift_report.html
 
 docs/site/
 
