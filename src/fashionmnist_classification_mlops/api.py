@@ -46,14 +46,30 @@ transform = transforms.Compose(
 
 @app.on_event("startup")
 async def load_model() -> None:
-    if not MODEL_PATH.exists():
-        # Let the service start, but predict will refuse.
-        print(f"Warning: Model not found at {MODEL_PATH}")
-        return
-    state = torch.load(MODEL_PATH, map_location=DEVICE)
-    model.load_state_dict(state)
-    model.eval()
-    print(f"Model loaded from {MODEL_PATH}")
+    try:
+        if not MODEL_PATH.exists():
+            print(f"WARNING: Model not found at {MODEL_PATH}")
+            print(f"Current directory: {Path.cwd()}")
+
+            if Path("models").exists():
+                model_files = list(Path("models").glob("*"))
+            else:
+                model_files = "models/ does not exist"
+
+            print(f"Files in models/: {model_files}")
+            return
+
+        print(f"Loading model from {MODEL_PATH}")
+        state = torch.load(MODEL_PATH, map_location=DEVICE, weights_only=True)
+        model.load_state_dict(state)
+        model.eval()
+        print("Model loaded successfully!")
+    except Exception as e:
+        print(f"ERROR loading model: {e}")
+        import traceback
+
+        traceback.print_exc()
+
 
 
 @app.get("/")
