@@ -1,14 +1,16 @@
-# src/fashionmnist_classification_mlops/evaluate.py
 from __future__ import annotations
 
 import os
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from sklearn.metrics import classification_report, confusion_matrix
 
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
+
+matplotlib.use("Agg")  # headless backend for CI (set before any plots)
 
 CLASS_NAMES = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 
