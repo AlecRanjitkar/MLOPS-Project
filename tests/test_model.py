@@ -1,6 +1,6 @@
-import pytest
 import time
 
+import pytest
 import torch
 
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP

@@ -1,10 +1,11 @@
-import pytest
-import torch
 from pathlib import Path
 
+import pytest
+import torch
+
 from fashionmnist_classification_mlops.data import (
-    _ensure_dir,
     _compute_mean_std,
+    _ensure_dir,
     load_processed,
 )
 

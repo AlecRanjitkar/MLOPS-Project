@@ -1,24 +1,22 @@
 from __future__ import annotations
 
+import cProfile
+import os
+import pstats
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
-import os
-import cProfile
-import pstats
 
 import hydra
 import matplotlib.pyplot as plt
 import torch
+from dotenv import load_dotenv
 from loguru import logger
 from omegaconf import DictConfig, OmegaConf
 
 import wandb
-from dotenv import load_dotenv
-
 from fashionmnist_classification_mlops.logging_utils import setup_logger
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
-
 
 # -----------------------------
 # Constants / utilities

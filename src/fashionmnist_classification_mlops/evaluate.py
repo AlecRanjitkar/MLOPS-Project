@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import classification_report, confusion_matrix
 
 from fashionmnist_classification_mlops.model import FashionCNN, FashionMLP
 
@@ -139,11 +140,11 @@ def plot_classification_report(y_true, y_pred, class_names, out_path):
 
 def main(model_type: str = "cnn"):
     # Load test data
-    X = torch.load("data/processed/test_images.pt")
+    x = torch.load("data/processed/test_images.pt")
     y = torch.load("data/processed/test_labels.pt")
 
-    if X.ndim == 3:
-        X = X.unsqueeze(1)
+    if x.ndim == 3:
+        x = x.unsqueeze(1)
 
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -152,7 +153,7 @@ def main(model_type: str = "cnn"):
     model.eval()
 
     with torch.no_grad():
-        preds = model(X.to(device)).argmax(dim=1).cpu()
+        preds = model(x.to(device)).argmax(dim=1).cpu()
 
     # Metrics
     acc = (preds == y).float().mean().item()
