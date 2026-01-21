@@ -81,8 +81,9 @@ def test_save_training_plots():
 def test_evaluate_function():
     """Test evaluation function."""
     from fashionmnist_classification_mlops.model import FashionCNN
+    from fashionmnist_classification_mlops.train import DEVICE
 
-    model = FashionCNN()
+    model = FashionCNN().to(DEVICE)  # Move model to the same device
 
     # Create dummy dataset
     images = torch.randn(20, 1, 28, 28)
