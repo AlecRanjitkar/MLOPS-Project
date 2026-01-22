@@ -282,7 +282,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 17 fill here ---
+We used Cloud Storage (Bucket) for storing versioned data via DVC and trained model artifacts. Artifact Registry stores our Docker images (train, evaluate, api) built by our CI/CD pipeline. Cloud Build automatically builds Docker images from our repository. Cloud Run deploys our FastAPI application as a serverless container, auto-scaling based on traffic without managing VMs
 
 ### Question 18
 
@@ -295,7 +295,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 18 fill here ---
+We did not directly use GCP Compute Engine VMs. Instead, we leveraged Cloud Run, a serverless platform that abstracts VM management. Cloud Run automatically provisions container instances to run our FastAPI Docker image, scaling based on demand. Model training occurs in GitHub Actions CI, not on GCP compute instances. Our deployment uses Cloud Run's managed infrastructure, which was chosen for cost efficiency since our Fashion-MNIST model doesn't require dedicated GPU instances.
 
 ### Question 19
 
@@ -311,7 +311,8 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 20 fill here ---
+![my_image](figures/registry.png)
+![my_image](figures/registr2.png)
 
 ### Question 21
 
