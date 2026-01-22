@@ -295,7 +295,7 @@ We used Cloud Storage (Bucket) for storing versioned data via DVC and trained mo
 >
 > Answer:
 
-We did not directly use GCP Compute Engine VMs. Instead, we leveraged Cloud Run, a serverless platform that abstracts VM management. Cloud Run automatically provisions container instances to run our FastAPI Docker image, scaling based on demand. Model training occurs in GitHub Actions CI, not on GCP compute instances. Our deployment uses Cloud Run's managed infrastructure, which was chosen for cost efficiency since our Fashion-MNIST model doesn't require dedicated GPU instances.
+We did not directly use Google Cloud Compute Engine virtual machines in this project. Instead, we leveraged Cloud Run, which is built on top of Compute Engine and abstracts away explicit VM management. Cloud Run automatically provisions and manages the underlying Compute Engine instances required to run our containerized FastAPI application. These VMs are fully managed by Google Cloud and scale automatically based on incoming request traffic, without requiring manual configuration of machine types, disks, or operating systems. Model training was executed in GitHub Actions CI rather than on GCP compute resources, as the Fashion-MNIST model is lightweight and does not require GPUs.
 
 ### Question 19
 
