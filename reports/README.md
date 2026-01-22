@@ -112,7 +112,7 @@ We used requirements.txt for managing our project dependencies with pinned versi
 >
 > Answer:
 
-From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `reports/`, and `tests/` folders. The `src/fashionmnist_classification_mlops/` folder contains our main code including `train.py`, `model.py`, `data.py`, `evaluate.py`, and `api.py`. We added a `conf/` folder for Hydra configuration files to manage hyperparameters and experiments. We also added a `dockerfiles/` folder containing three Dockerfiles (train, evaluate, and api) for containerization. We created `.github/workflows/` for CI/CD pipelines including automated testing and Docker image building. The `reports/profiler/` folder stores profiling results for performance analysis. Overall, we maintained the template structure while extending it with modern MLOps tooling.
+From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `reports/`, and `tests/` folders. The `src/fashionmnist_classification_mlops/` folder contains our main code including `train.py`, `model.py`, `data.py`, `evaluate.py`, and `api.py`. `logging_utils.py`, `drift_detection.py`, `visualize.py`, `cli.py`, and `sweep_runner.py` for W&B hyperparameter sweeps. We added a `conf/` folder for Hydra configuration files to manage hyperparameters and experiments, plus a configs folder for W&B sweep configurations. We created a `dockerfiles/` folder containing three separate Dockerfiles (train, evaluate, and api) for containerization, along with a `requirements-docker.txt` for CPU-optimized dependencies. We implemented comprehensive CI/CD in `workflows` with five workflows: automated testing, code quality checks (ruff), Docker image building, data validation, and model registry. The `profiler/` folder stores profiling results for performance analysis. We also added `tasks.py` with Invoke commands for common operations, `.pre-commit-config.yaml` for Git hooks, and a `Procfile` for deployment. Overall, we maintained the cookiecutter structure while significantly extending it with modern MLOps tooling.
 
 ### Question 6
 
@@ -312,7 +312,7 @@ We did not directly use Google Cloud Compute Engine virtual machines in this pro
 > Answer:
 
 ![my_image](figures/registry.png)
-![my_image](figures/registr2.png)
+![my_image](figures/registry2.png)
 
 ### Question 21
 
