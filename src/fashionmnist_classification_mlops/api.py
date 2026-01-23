@@ -70,8 +70,11 @@ def _download_from_gcs(gs_uri: str, dest: Path) -> None:
     blob.download_to_filename(str(dest))
 
 
-@app.on_event("startup")
-async def load_model() -> None:
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global MODEL_LOADED
     MODEL_LOADED = False
     try:
@@ -81,6 +84,7 @@ async def load_model() -> None:
 
             if not MODEL_URI:
                 print("MODEL_URI env var not set, cannot download model from GCS.")
+                yield
                 return
 
             print(f"Downloading model from {MODEL_URI} -> {MODEL_PATH}")
@@ -100,6 +104,10 @@ async def load_model() -> None:
         import traceback
 
         traceback.print_exc()
+
+    yield  # This is required for the lifespan context manager
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")

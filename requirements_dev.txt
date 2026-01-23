@@ -8,6 +8,10 @@ pre-commit==4.1.0
 pytest==8.3.4
 pytest-cov==6.0.0
 coverage==7.8.0
+httpx
+numpy
+locust
+
 
 # linting
 ruff==0.11.6
@@ -18,3 +22,5 @@ mkdocs-material==9.6.1
 mkdocstrings-python==1.16.10
 
 evidently>=0.4.0
+
+
