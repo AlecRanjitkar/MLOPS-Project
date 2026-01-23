@@ -464,6 +464,12 @@ Here, <PATH_TO_LOCAL_IMAGE> refers to any image file available on the client mac
 >
 > Answer:
 
+Yes, unit testing was performed for the API, while load testing was not conducted as part of the implementation, but a clear plan exists for how it would be done.
+
+For unit testing, we used pytest together with FastAPI’s TestClient. The tests cover all main endpoints, including /, /health, /classes, /predict, /predict/batch, and /metrics. We tested both normal and edge cases, such as valid image predictions, invalid file uploads, batch predictions, and correct error handling when the model is not loaded (returning HTTP 503). To isolate the API layer, the model loading was mocked by overriding the MODEL_LOADED flag, ensuring fast and deterministic tests without loading the actual ML model.
+
+Load testing was not executed, but it would be done using tools such as Locust or k6. The plan would be to simulate concurrent users sending prediction requests with image payloads, gradually increasing the request rate until latency or error rates become unacceptable. Metrics such as response time, throughput, error rate, and resource usage would be monitored to determine the API’s breaking point and scalability limits.
+
 ### Question 26
 
 > **Did you manage to implement monitoring of your deployed model? If yes, explain how it works. If not, explain how** > **monitoring would help the longevity of your application.**
