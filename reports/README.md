@@ -604,9 +604,9 @@ Finally, time constraints and team size limited how much advanced optimization (
 
 The work in this project was divided relatively evenly across all three team members, with each member taking responsibility for different parts of the MLOps pipeline while collaborating closely throughout the project.
 
-Student s205427 was primarily responsible for setting up and managing the Google Cloud infrastructure used in the project. This included configuring cloud resources, handling cloud deployment aspects, and ensuring that services such as storage and containerized applications could run reliably in the cloud environment.
+Student s205427 was primarily responsible for setting up and managing the Google Cloud infrastructure used in the project. This included configuring cloud resources, handling cloud deployment aspects, and ensuring that services such as storage and containerized applications could run reliably in the cloud environment, responsible for Dockerization, and project setup with cookiecutter template.
 
-Student s205466 focused mainly on the core MLOps pipeline, including model training, experiment tracking, API development, Dockerization, testing, and monitoring. This student implemented the FastAPI inference service, logging of input-output data, load testing using Locust, unit testing with PyTest, and worked extensively on drift detection and monitoring components.
+Student s205466 focused mainly on the core MLOps pipeline, including model training, experiment tracking, API development, testing, and monitoring. This student implemented the FastAPI inference service, logging of input-output data, load testing using Locust, unit testing with PyTest, and worked extensively on drift detection and monitoring components.
 
 Student s205414 contributed to data handling, model development, and robustness analysis, including work related to data preprocessing, evaluating model behavior under data drift, and assisting with frontend and visualization components.
 
