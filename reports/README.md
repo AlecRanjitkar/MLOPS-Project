@@ -334,7 +334,7 @@ docker build -f dockerfiles/api.dockerfile -t fashionmnist-api .
 docker run -p 8080:8080 -e MODEL_URI=gs://mlops-project-484413-dvc/models/model.pth fashionmnist-api
 ```
 
-Link to one of the dockerfiles https://github.com/AlecRanjitkar/MLOPS-Project/blob/main/dockerfiles/train.dockerfile
+dockerfile link https://github.com/AlecRanjitkar/MLOPS-Project/blob/main/dockerfiles/train.dockerfile
 
 ### Question 16
 

@@ -23,18 +23,13 @@ CLASS_NAMES = [
     "Ankle boot",
 ]
 
-
-stats = torch.load("data/processed/stats.pt")
-MEAN = stats["mean"]
-STD = stats["std"]
-
 # Then update the transform:
 transform = transforms.Compose(
     [
         transforms.Grayscale(),
         transforms.Resize((28, 28)),
         transforms.ToTensor(),
-        transforms.Normalize((MEAN,), (STD,)),
+        transforms.Normalize((0.5,), (0.5,)),
     ]
 )
 session = ort.InferenceSession("models/model.onnx", providers=["CPUExecutionProvider"])
