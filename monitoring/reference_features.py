@@ -1,19 +1,12 @@
-import torch
-import pandas as pd
 import numpy as np
+import pandas as pd
+import torch
 from torchvision import datasets, transforms
 
-transform = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
-])
+transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
-dataset = datasets.FashionMNIST(
-    root="data",
-    train=True,
-    download=True,
-    transform=transform
-)
+dataset = datasets.FashionMNIST(root="data", train=True, download=True, transform=transform)
+
 
 def extract_features(x):
     img = x.squeeze().numpy()
@@ -21,6 +14,7 @@ def extract_features(x):
         "avg_brightness": float(np.mean(img)),
         "contrast": float(np.std(img)),
     }
+
 
 rows = []
 for img, _ in dataset:

@@ -59,7 +59,7 @@ uv add typer markdown
 >
 > Answer:
 
-s205414, s205427, and s205460
+s205414, s205427, and s205466
 
 ### Question 3
 
@@ -72,7 +72,11 @@ s205414, s205427, and s205460
 >
 > Answer:
 
---- question 3 fill here ---
+Yes, we used a few open-source frameworks and packages that were not explicitly covered in the course to help complete our project.
+
+We used Evidently to perform data drift detection on features collected from our deployed model. Evidently allowed us to compare reference data with live prediction data and generate automated drift reports, which supported our work in Module M27 on data drifting and monitoring.
+
+We also used Streamlit to build a lightweight frontend for interacting with the deployed model. Streamlit made it easy to create a simple user interface for image uploads and predictions without needing to build a full web frontend.
 
 ## Coding environment
 
@@ -90,16 +94,26 @@ s205414, s205427, and s205460
 >
 > Answer:
 
-We used requirements.txt for managing our project dependencies with pinned versions (e.g., torch>=2.0.0). We also maintain a requirements_dev.txt file for development specific tools. The project is installable as a package using pyproject.toml. To get a complete copy of our development environment this is what users need to do:
+We managed dependencies using pip with versioned dependency files and a reproducible project structure. Core runtime dependencies are defined in requirements.txt, while development-specific tools (testing, formatting, and experimentation) are listed in requirements_dev.txt. The project is also installable as a Python package via pyproject.toml, which allows consistent imports across services.
 
-- (1) Clone the repository,
-- (2) Create a virtual environment: `python -m venv .venv`,
-- (3) Activate it: `source .venv/bin/activate`,
-- (4) Install dependencies: `pip install -r requirements.txt` and `pip install -r requirements_dev.txt`,
-- (5) Install the package in editable mode: `pip install -e .`,
-- (6) Install DVC with remote storage: `pip install dvc dvc-gdrive`,
-- (7) Pull versioned data: `dvc pull` (requires DVC remote configuration with Google Drive credentials).
-  This ensures reproducible environments across all team members.
+To ensure reproducibility, we documented all setup and execution commands in the root README, which serves as the single source of truth for running the API, frontend, monitoring services, and Docker containers.
+
+To obtain an exact copy of our development environment, a new team member would:
+
+1. Clone the repository.
+
+2. Create a virtual environment: python -m venv .venv.
+
+3. Activate it: source .venv/bin/activate.
+
+4. Install dependencies:
+pip install -r requirements.txt and pip install -r requirements_dev.txt.
+
+5. Install the project in editable mode: pip install -e ..
+
+6. Install DVC and pull versioned artifacts if required.
+
+Additionally, Dockerfiles are provided for the API, frontend, and monitoring components, enabling full environment replication via containerization without local dependency setup.
 
 ### Question 5
 
@@ -272,8 +286,17 @@ This ensures the exact same hyperparameters, data, and random seed are used, gua
 >
 > Answer:
 
---- question 14 fill here ---
+![Training metrics in W&B](figures/wandb_training.png)
 
+![Hyperparameter comparison](figures/wandb_sweep.png)
+
+We used Weights & Biases (W&B) as our experiment tracking platform to monitor training progress, compare different runs, and analyze the impact of hyperparameters on model performance.
+
+Figure 1 shows the evolution of training loss and training accuracy over training steps for one of our CNN runs. We tracked train/loss to ensure that the optimization process was converging and that the model was learning meaningful representations instead of diverging. A steadily decreasing loss indicates stable training, while sudden spikes help identify potential issues such as learning rate instability. In parallel, train/accuracy was tracked to verify that performance improvements aligned with the loss reduction and to detect early signs of underfitting or overfitting.
+
+Figure 2 provides an overview of multiple experiment runs executed with different configurations, including the number of epochs, learning rate, device type, and model architecture. For each run, we logged training accuracy, training loss, and test accuracy at the final epoch. These metrics allowed us to compare runs directly and select the best-performing model based on generalization performance rather than training metrics alone.
+
+Tracking both loss and accuracy was essential to understand the trade-off between model capacity and performance. Logging hyperparameters alongside metrics ensured reproducibility and made it easy to identify which configurations led to better results. Overall, W&B helped us systematically experiment, debug training behavior, and confidently select the best model for deployment.
 ### Question 15
 
 > **Docker is an important tool for creating containerized applications. Explain how you used docker in your** > **experiments/project? Include how you would run your docker images and include a link to one of your docker files.**
@@ -464,6 +487,14 @@ Here, <PATH_TO_LOCAL_IMAGE> refers to any image file available on the client mac
 >
 > Answer:
 
+We performed both basic unit testing and load testing of our API during the project.
+
+For unit testing, we relied on FastAPI’s built-in testing utilities together with pytest. We tested individual endpoints such as /health and /predict by sending known inputs and verifying that the responses had the correct structure, status codes, and data types. These tests ensured that the API behaved correctly when the model was loaded, when it was unavailable, and when invalid inputs were provided.
+
+For load testing, we used Locust, an open-source load testing framework. We defined a Locust user that repeatedly sent image prediction requests to the /predict endpoint and gradually increased the number of concurrent users. The results showed that the service handled a moderate number of concurrent requests reliably on local hardware, with stable response times and no crashes. As expected, latency increased as concurrency rose, mainly due to CPU-bound model inference.
+
+Overall, this testing gave us confidence that the API is functionally correct and reasonably robust under load for a prototype deployment.
+
 ### Question 26
 
 > **Did you manage to implement monitoring of your deployed model? If yes, explain how it works. If not, explain how** > **monitoring would help the longevity of your application.**
@@ -475,7 +506,13 @@ Here, <PATH_TO_LOCAL_IMAGE> refers to any image file available on the client mac
 >
 > Answer:
 
---- question 26 fill here ---
+We partially implemented monitoring of our deployed model, with a primary focus on data collection and data drift detection, as required in M27.
+
+Our inference API logs input–output data for every prediction request. Specifically, we extract lightweight numerical features from each input image (e.g., average brightness and contrast) and store them together with timestamps, predicted classes, and confidence scores. This logged data represents the current production data distribution.
+
+Using this collected data, we set up a drift monitoring service that compares recent prediction data against a reference dataset derived from the training distribution. We use the open-source Evidently library to compute data drift metrics and generate a drift report that can be accessed via an HTTP endpoint.
+
+While the monitoring is not fully automated with alerts or dashboards, it demonstrates the core M27 concept: continuously comparing training and production data to identify distribution shifts. Such monitoring improves the longevity of the application by enabling early detection of data drift, allowing retraining or corrective actions before model performance degrades.
 
 ## Overall discussion of project
 
@@ -507,7 +544,11 @@ Overall, working in the cloud was a positive experience. It enabled rapid experi
 >
 > Answer:
 
---- question 28 fill here ---
+We implemented a simple frontend for our prediction API to make the system easier to use and to demonstrate the full inference pipeline without relying on command-line tools. Users can upload images and view predictions and confidence scores through a browser interface.
+
+In addition, we implemented a separate drift detection service that analyzes logged input–output data from the deployed model and compares it against reference data from training. This monitoring component was kept independent from the inference API to follow a modular design.
+
+All major components were containerized using Docker to ensure reproducibility and simplify deployment.
 
 ### Question 29
 
@@ -521,7 +562,15 @@ Overall, working in the cloud was a positive experience. It enabled rapid experi
 >
 > Answer:
 
---- question 29 fill here ---
+![System architecture](/architecture.png)
+
+Our system starts in the local development environment where we train a Fashion-MNIST classifier using PyTorch. The training script produces a model artifact (models/model.pth). From the same preprocessing pipeline, we define a small set of lightweight input features (e.g., avg_brightness, contrast or alternatively mean/std/min/max) that can be computed quickly for every incoming request. We use these features to build a reference dataset (reference_features.csv) that represents “normal” data and acts as the baseline for drift detection.
+
+The model is served through a FastAPI inference service exposing endpoints such as /predict and /health. When a user sends an image to /predict, the API preprocesses it, runs inference, returns the predicted class and confidence, and logs input-output metadata to monitoring/prediction_log.csv. This log contains timestamps, the extracted features, and prediction outputs, enabling monitoring without storing raw images.
+
+For drift monitoring, we run a separate drift detection API (also FastAPI) that reads the baseline reference features and compares them to the most recent production samples from prediction_log.csv. Using Evidently, it generates a drift report (HTML) at /drift-report. This separation keeps the inference API lightweight while allowing monitoring to evolve independently.
+
+For cloud integration, the repository is version-controlled in GitHub and CI is handled through GitHub Actions (lint/tests/build). Docker images for the inference API and drift monitor are built and can be pushed to a container registry (GCR/GAR). In a full deployment, the API can be deployed to Cloud Run/VM and optionally download the model from GCS via a MODEL_URI environment variable. The same pattern applies to deploying the drift monitor service.
 
 ### Question 30
 
@@ -534,7 +583,15 @@ Overall, working in the cloud was a positive experience. It enabled rapid experi
 >
 > Answer:
 
---- question 30 fill here ---
+One of the main challenges of the project was integration and compatibility across multiple tools and frameworks rather than any single modeling task. While training the Fashion-MNIST model itself was relatively straightforward, a significant amount of time was spent on deployment, monitoring, and tooling glue code, which is typical in real-world MLOps projects.
+
+A major struggle was serving and monitoring infrastructure, especially when integrating FastAPI, Docker, Evidently, and cloud-related components. In particular, we spent a lot of time dealing with dependency conflicts and breaking changes in third-party libraries. For example, Evidently introduced multiple API changes across versions, and newer versions were incompatible with NumPy 2.0, causing runtime errors inside Docker containers. Resolving this required pinning specific versions (e.g. evidently==0.4.22) and rebuilding images multiple times to achieve a stable setup.
+
+Another time-consuming challenge was drift detection setup. While conceptually simple, aligning reference data, production logs, and feature schemas proved error-prone. Small mismatches in column names or missing features caused failures during report generation. We overcame this by clearly defining a minimal feature set, enforcing consistent logging in the inference API, and validating logs manually before running drift reports.
+
+Dockerization also required considerable effort, especially debugging missing files, incorrect mount paths, and container startup failures. These issues were resolved by simplifying Dockerfiles, using volume mounts during development, and testing containers interactively.
+
+Finally, time constraints and team size limited how much advanced optimization (e.g., distributed training, cloud alerts) we could implement. To overcome this, we focused on delivering a robust, end-to-end pipeline that demonstrated core MLOps concepts: reproducibility, deployment, monitoring, and drift detection. Overall, the project highlighted that MLOps complexity lies less in modeling and more in reliable system integration.
 
 ### Question 31
 
@@ -546,4 +603,16 @@ Overall, working in the cloud was a positive experience. It enabled rapid experi
 > _Student sXXXXXX was in charge of developing of setting up the initial cookie cutter project and developing of the_ > _docker containers for training our applications._ > _Student sXXXXXX was in charge of training our models in the cloud and deploying them afterwards._ > _All members contributed to code by..._ > _We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code._
 > Answer:
 
---- question 31 fill here ---
+The work in this project was divided relatively evenly across all three team members, with each member taking responsibility for different parts of the MLOps pipeline while collaborating closely throughout the project.
+
+Student s205427 was primarily responsible for setting up and managing the Google Cloud infrastructure used in the project. This included configuring cloud resources, handling cloud deployment aspects, and ensuring that services such as storage and containerized applications could run reliably in the cloud environment.
+
+Student s205466 focused mainly on the core MLOps pipeline, including model training, experiment tracking, API development, Dockerization, testing, and monitoring. This student implemented the FastAPI inference service, logging of input-output data, load testing using Locust, unit testing with PyTest, and worked extensively on drift detection and monitoring components. 
+
+Student s205414 contributed to data handling, model development, and robustness analysis, including work related to data preprocessing, evaluating model behavior under data drift, and assisting with frontend and visualization components. 
+
+
+All team members contributed to testing, documentation, and general code improvements across the project.
+
+
+We used generative AI tools to support development. ChatGPT was used primarily to help debug errors, clarify implementation details, and improve code readability through formatting and comments. GitHub Copilot was used inside the editor to assist with code generation and debugging suggestions, but all final design decisions and implementations were made by the team.

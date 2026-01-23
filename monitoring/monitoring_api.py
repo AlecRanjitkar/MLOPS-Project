@@ -3,12 +3,11 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import pandas as pd
+from evidently.metric_preset import DataDriftPreset
+from evidently.report import Report
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from google.cloud import storage
-
-from evidently.report import Report
-from evidently.metric_preset import DataDriftPreset
 
 app = FastAPI()
 
