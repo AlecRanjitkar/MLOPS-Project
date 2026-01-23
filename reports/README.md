@@ -410,7 +410,11 @@ Additionally, as a three member team working within a limited timeframe, we prio
 >
 > Answer:
 
---- question 23 fill here ---
+We did manage to write an API for our trained model using FastAPI. The API is defined in api.py and serves a trained FashionCNN model for inference. A lifespan context manager is used to load the model once at application startup, either from a local model.pth file or by downloading it from Google Cloud Storage using the MODEL_URI environment variable. This avoids reloading the model on every request and improves performance.
+
+The main /predict endpoint accepts image uploads via FastAPI’s UploadFile. Uploaded images are converted to PIL format and preprocessed using torchvision transforms, including grayscale conversion, resizing to 28×28, tensor conversion, and normalization. The processed image is passed through the model, and the output logits are converted to probabilities using softmax. The API returns the predicted class along with its confidence score.
+
+In addition, we implemented auxiliary endpoints such as /health for readiness checks, /metrics for basic monitoring, and /classes to list available Fashion-MNIST labels. The API is fully containerized with Docker and deployed to Google Cloud Run for scalable inference.
 
 ### Question 24
 
@@ -423,7 +427,31 @@ Additionally, as a three member team working within a limited timeframe, we prio
 >
 > Answer:
 
---- question 24 fill here ---
+We successfully deployed our API both locally and in the cloud. For local deployment, we wrapped our FastAPI application in a Docker container and tested it by running:
+
+```bash
+docker build -f dockerfiles/api.dockerfile -t fashionmnist-api .
+docker run -p 8080:8080 -v $(pwd)/models:/app/models fashionmnist-api
+```
+
+and it can be invoked the following way:
+
+```bash curl -X POST \
+ -F "file=@<PATH_TO_LOCAL_IMAGE>" \
+ http://localhost:8080/predict
+```
+
+This served the API at localhost:8080, allowing us to verify functionality before cloud deployment.
+
+For cloud deployment, we used Google Cloud Run, which automatically provisions serverless containers. Our CI/CD pipeline (GitHub Actions) builds the Docker image and pushes it to Google Container Registry (GHCR). Cloud Run then deploys the container with automatic scaling. The deployed API can be invoked using:
+
+```bash
+curl -X POST \
+ -F "file=@<PATH_TO_LOCAL_IMAGE>" \
+ https://fashionmnist-api-773196702268.europe-west1.run.app/predict
+```
+
+Here, <PATH_TO_LOCAL_IMAGE> refers to any image file available on the client machine. The API returns a JSON response containing the predicted Fashion-MNIST class and confidence score.
 
 ### Question 25
 
