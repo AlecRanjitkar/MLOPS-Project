@@ -282,19 +282,27 @@ This ensures the exact same hyperparameters, data, and random seed are used, gua
 Docker was used extensively in our project to containerize all major stages of the machine learning pipeline and ensure reproducibility across environments. We developed three separate Docker images: one for model training, one for model evaluation, and one for serving predictions via a FastAPI application. Each image is built from a dedicated Dockerfile located in the dockerfiles/ directory and uses a shared dependency specification to ensure consistency.
 
 The training image encapsulates the full training logic and expects the processed dataset to be mounted at runtime. It can be run as:
+
+```bash
 docker build -f dockerfiles/train.dockerfile -t fashionmnist-train .
 docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models fashionmnist-train
+```
 
 This trains the model and stores the resulting weights in the mounted models/ directory.
 
 Similarly, the evaluation image loads the trained model and dataset to generate evaluation metrics and reports:
+
+```bash
 docker build -f dockerfiles/evaluate.dockerfile -t fashionmnist-evaluate .
 docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models -v $(pwd)/reports:/app/reports fashionmnist-evaluate
+```
 
 Finally, the API image serves the trained model through a FastAPI endpoint and can load the model either locally or from Google Cloud Storage:
 
+```bash
 docker build -f dockerfiles/api.dockerfile -t fashionmnist-api .
 docker run -p 8080:8080 -e MODEL_URI=gs://mlops-project-484413-dvc/models/model.pth fashionmnist-api
+```
 
 Link to one of the dockerfiles https://github.com/AlecRanjitkar/MLOPS-Project/blob/main/dockerfiles/train.dockerfile
 
@@ -309,7 +317,9 @@ Link to one of the dockerfiles https://github.com/AlecRanjitkar/MLOPS-Project/bl
 >
 > Answer:
 
---- question 16 fill here ---
+Debugging methods were primarily collaborative in our group. We used a combination of print statements, Loguru logging output, and VS Code's integrated debugger to trace issues. For CI/CD failures, we examined GitHub Actions logs to identify problems with Docker builds, dependency installation, and test execution. When Docker builds initially timed out due to large PyTorch downloads, we debugged by analyzing build logs and ultimately created requirements-docker.txt with CPU only PyTorch.
+
+We did perform code profiling using Python's cProfile on our training pipeline. The profiling run revealed that data loading and forward passes dominated execution time, which was expected for our model size. 
 
 ## Working in the cloud
 
