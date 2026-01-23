@@ -107,7 +107,7 @@ To obtain an exact copy of our development environment, a new team member would:
 3. Activate it: source .venv/bin/activate.
 
 4. Install dependencies:
-pip install -r requirements.txt and pip install -r requirements_dev.txt.
+   pip install -r requirements.txt and pip install -r requirements_dev.txt.
 
 5. Install the project in editable mode: pip install -e ..
 
@@ -157,7 +157,7 @@ We used Ruff for lintinng and formatting, with rules defined in the project conf
 >
 > Answer:
 
-In total we have implemented a total of 23 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
+In total we have implemented a total of 31 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
 
 ### Question 8
 
@@ -170,7 +170,7 @@ In total we have implemented a total of 23 tests. Primarily, we are testing the 
 >
 > Answer:
 
-The total code coverage of our project is 37% at the time of measurement. When the initial tests were implemented, the codebase was smaller, and additional functionality such as extended logging, experiment tracking, and auxiliary utilities was added afterward without corresponding tests. As a result, the coverage does not fully reflect the amount of testing performed on the core logic.
+The total code coverage of our project is 28% at the time of measurement. When the initial tests were implemented, the codebase was smaller, and additional functionality such as extended logging, experiment tracking, and auxiliary utilities was added afterward without corresponding tests. As a result, the coverage does not fully reflect the amount of testing performed on the core logic.
 
 Even if the code coverage were close to 100%, we would not consider the code to be error free. High coverage only indicates that lines of code have been executed during tests, not that the underlying logic is correct or that all edge cases are handled. In machine learning projects, it is often difficult to exhaustively test training loops, external dependencies, and logging behavior. A slightly lower coverage can provide greater flexibility, allowing faster iteration and experimentation.
 
@@ -297,6 +297,7 @@ Figure 1 shows the evolution of training loss and training accuracy over trainin
 Figure 2 provides an overview of multiple experiment runs executed with different configurations, including the number of epochs, learning rate, device type, and model architecture. For each run, we logged training accuracy, training loss, and test accuracy at the final epoch. These metrics allowed us to compare runs directly and select the best-performing model based on generalization performance rather than training metrics alone.
 
 Tracking both loss and accuracy was essential to understand the trade-off between model capacity and performance. Logging hyperparameters alongside metrics ensured reproducibility and made it easy to identify which configurations led to better results. Overall, W&B helped us systematically experiment, debug training behavior, and confidently select the best model for deployment.
+
 ### Question 15
 
 > **Docker is an important tool for creating containerized applications. Explain how you used docker in your** > **experiments/project? Include how you would run your docker images and include a link to one of your docker files.**
@@ -605,12 +606,10 @@ The work in this project was divided relatively evenly across all three team mem
 
 Student s205427 was primarily responsible for setting up and managing the Google Cloud infrastructure used in the project. This included configuring cloud resources, handling cloud deployment aspects, and ensuring that services such as storage and containerized applications could run reliably in the cloud environment.
 
-Student s205466 focused mainly on the core MLOps pipeline, including model training, experiment tracking, API development, Dockerization, testing, and monitoring. This student implemented the FastAPI inference service, logging of input-output data, load testing using Locust, unit testing with PyTest, and worked extensively on drift detection and monitoring components. 
+Student s205466 focused mainly on the core MLOps pipeline, including model training, experiment tracking, API development, Dockerization, testing, and monitoring. This student implemented the FastAPI inference service, logging of input-output data, load testing using Locust, unit testing with PyTest, and worked extensively on drift detection and monitoring components.
 
-Student s205414 contributed to data handling, model development, and robustness analysis, including work related to data preprocessing, evaluating model behavior under data drift, and assisting with frontend and visualization components. 
-
+Student s205414 contributed to data handling, model development, and robustness analysis, including work related to data preprocessing, evaluating model behavior under data drift, and assisting with frontend and visualization components.
 
 All team members contributed to testing, documentation, and general code improvements across the project.
-
 
 We used generative AI tools to support development. ChatGPT was used primarily to help debug errors, clarify implementation details, and improve code readability through formatting and comments. GitHub Copilot was used inside the editor to assist with code generation and debugging suggestions, but all final design decisions and implementations were made by the team.
