@@ -10,8 +10,16 @@ from torchvision import transforms
 app = FastAPI(title="Fashion-MNIST ONNX API")
 
 CLASS_NAMES = [
-    "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
-    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot",
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot",
 ]
 
 transform = transforms.Compose(
@@ -25,6 +33,7 @@ transform = transforms.Compose(
 
 session = ort.InferenceSession("models/model.onnx", providers=["CPUExecutionProvider"])
 input_name = session.get_inputs()[0].name
+
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
