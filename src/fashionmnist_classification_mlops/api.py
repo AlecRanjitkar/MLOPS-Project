@@ -3,6 +3,7 @@ from __future__ import annotations
 import io
 import os
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -14,29 +15,16 @@ from torchvision import transforms
 
 from fashionmnist_classification_mlops.model import FashionCNN
 
-# Metrics tracking
-request_count = 0
-prediction_times: list[float] = []
-
-app = FastAPI(title="Fashion-MNIST Classifier API")
-
-MODEL_LOADED = False
+# --- Config ---
 MODEL_PATH = Path("models/model.pth")
-MODEL_URI = os.getenv("MODEL_URI")  # e.g. gs://mlops-project-484413-dvc/models/model.pth
+MODEL_URI = os.getenv("MODEL_URI")  # e.g. gs://bucket/path/model.pth
 DEVICE = torch.device("cpu")
-model = FashionCNN().to(DEVICE)
+
+SKIP_MODEL_LOAD = os.getenv("SKIP_MODEL_LOAD", "0") == "1"
 
 CLASS_NAMES = [
-    "T-shirt/top",
-    "Trouser",
-    "Pullover",
-    "Dress",
-    "Coat",
-    "Sandal",
-    "Shirt",
-    "Sneaker",
-    "Bag",
-    "Ankle boot",
+    "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
+    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot",
 ]
 
 transform = transforms.Compose(
@@ -47,6 +35,13 @@ transform = transforms.Compose(
         transforms.Normalize((0.5,), (0.5,)),
     ]
 )
+
+# --- Global state ---
+MODEL_LOADED = False
+model = FashionCNN().to(DEVICE)
+
+request_count = 0
+prediction_times: list[float] = []
 
 
 def _download_from_gcs(gs_uri: str, dest: Path) -> None:
@@ -70,13 +65,17 @@ def _download_from_gcs(gs_uri: str, dest: Path) -> None:
     blob.download_to_filename(str(dest))
 
 
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Loads model once at startup, unless SKIP_MODEL_LOAD=1."""
     global MODEL_LOADED
     MODEL_LOADED = False
+
+    if SKIP_MODEL_LOAD:
+        print("SKIP_MODEL_LOAD=1 -> skipping model load")
+        yield
+        return
+
     try:
         if not MODEL_PATH.exists():
             print(f"Model not found locally at {MODEL_PATH}")
@@ -102,12 +101,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"ERROR loading model: {e}")
         import traceback
-
         traceback.print_exc()
 
-    yield  # This is required for the lifespan context manager
+    yield
 
-app = FastAPI(lifespan=lifespan)
+
+app = FastAPI(title="Fashion-MNIST Classifier API", lifespan=lifespan)
 
 
 @app.get("/")
@@ -130,13 +129,11 @@ async def health():
 
 @app.get("/classes")
 async def get_classes():
-    """Get all available class names."""
     return {"classes": CLASS_NAMES, "num_classes": len(CLASS_NAMES)}
 
 
 @app.get("/metrics")
 async def get_metrics():
-    """Get API metrics for monitoring."""
     avg_time = sum(prediction_times) / len(prediction_times) if prediction_times else 0
     return {
         "total_requests": request_count,
@@ -147,7 +144,6 @@ async def get_metrics():
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    """Predict the class of a single uploaded image."""
     global request_count
     request_count += 1
 
@@ -170,8 +166,7 @@ async def predict(file: UploadFile = File(...)):
         pred_idx = int(probs.argmax(dim=1).item())
         confidence = float(probs[0, pred_idx].item())
 
-    elapsed = time.time() - start_time
-    prediction_times.append(elapsed)
+    prediction_times.append(time.time() - start_time)
 
     return {
         "predicted_class": CLASS_NAMES[pred_idx],
@@ -182,12 +177,11 @@ async def predict(file: UploadFile = File(...)):
 
 @app.post("/predict/batch")
 async def predict_batch(files: list[UploadFile] = File(...)):
-    """Predict classes for multiple uploaded images."""
     global request_count
     request_count += 1
 
-    if not MODEL_PATH.exists():
-        raise HTTPException(status_code=503, detail=f"Model not found at {MODEL_PATH}")
+    if not MODEL_LOADED:
+        raise HTTPException(status_code=503, detail=f"Model not loaded (expected at {MODEL_PATH})")
 
     if len(files) > 100:
         raise HTTPException(status_code=400, detail="Maximum 100 images per batch")
@@ -208,25 +202,11 @@ async def predict_batch(files: list[UploadFile] = File(...)):
                 confidence = float(probs[0, pred_idx].item())
 
             results.append(
-                {
-                    "filename": file.filename,
-                    "predicted_class": CLASS_NAMES[pred_idx],
-                    "confidence": confidence,
-                }
+                {"filename": file.filename, "predicted_class": CLASS_NAMES[pred_idx], "confidence": confidence}
             )
         except Exception as e:
-            results.append(
-                {
-                    "filename": file.filename,
-                    "error": str(e),
-                }
-            )
+            results.append({"filename": file.filename, "error": str(e)})
 
-    elapsed = time.time() - start_time
-    prediction_times.append(elapsed)
+    prediction_times.append(time.time() - start_time)
 
-    return {
-        "batch_size": len(files),
-        "results": results,
-        "total_time_seconds": round(elapsed, 3),
-    }
+    return {"batch_size": len(files), "results": results}
