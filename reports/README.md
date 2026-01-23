@@ -142,6 +142,7 @@ We used Ruff for lintinng and formatting, with rules defined in the project conf
 > _In total we have implemented X tests. Primarily we are testing ... and ... as these the most critical parts of our_ > _application but also ... ._
 >
 > Answer:
+
 In total we have implemented a total of 23 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
 
 ### Question 8
@@ -184,6 +185,7 @@ In addition, we often worked collaboratively on the same tasks from a single com
 > _We did make use of DVC in the following way: ... . In the end it helped us in ... for controlling ... part of our_ > _pipeline_
 >
 > Answer:
+
 We did make use of DVC for versioning our Fashion-MNIST dataset. We tracked the processed directory containing preprocessed tensors (train_images.pt, test_images.pt, train_labels.pt, test_labels.pt, and stats.pt totaling 220MB) using a processed.dvc file. We configured DVC with Google Cloud Storage (gs://mlops-project-484413-dvc) as our remote storage backend. In the end it helped us in controlling the data distribution part of our pipeline by ensuring all team members could pull identical preprocessed data using dvc pull. This eliminated "works on my machine" issues and enabled our CI/CD pipeline to access the same versioned data during automated testing and Docker builds. DVC integration with GCS provided persistent cloud storage, making data accessible across local development and cloud deployment environments without bloating our Git repository.
 
 ### Question 11
@@ -196,6 +198,18 @@ We did make use of DVC for versioning our Fashion-MNIST dataset. We tracked the 
 > _We have organized our continuous integration into 3 separate files: one for doing ..., one for running ... testing_ > _and one for running ... . In particular for our ..., we used ... .An example of a triggered workflow can be seen_ > _here: <weblink>_
 >
 > Answer:
+
+We have organized our continuous integration into five separate GitHub Actions workflows: one for running unit tests `tests.yaml`, one for code quality checks `codecheck.yaml`, one for building and pushing Docker images `docker-build.yaml`, one for monitoring data changes `data-changes.yaml`, and one for model registry staging `model-registry.yaml`.
+
+In our testing workflow, we run pytest across multiple operating systems (Ubuntu, Windows, macOS) and Python versions (3.10, 3.11, 3.12) using a matrix strategy. This ensures cross-platform compatibility and validates that our code works across different Python environments. We make use of pip caching via actions/setup-python@v5 to speed up dependency installation. The workflow installs CPU-only PyTorch to avoid unnecessary downloads during CI.
+
+The code quality workflow uses Ruff for both linting and formatting checks, running on Python 3.12 with Ubuntu. This enforces consistent code style and catches common errors before merging.
+
+Our Docker build workflow automatically builds and pushes three container images (train, evaluate, api) to GitHub Container Registry whenever code is pushed to main. It uses Docker Buildx with GitHub Actions cache to optimize build times.
+
+The data changes workflow monitors DVC file changes and validates data integrity, while the model registry workflow handles staged model events from W&B for automated model deployment.
+
+Link to one of the works: https://github.com/AlecRanjitkar/MLOPS-Project/actions/workflows/docker-build.yaml
 
 --- question 11 fill here ---
 
@@ -215,13 +229,11 @@ We did make use of DVC for versioning our Fashion-MNIST dataset. We tracked the 
 >
 > Answer:
 
-We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings: 
+We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings:
 python -m fashionmnist_classification_mlops.train
 
 To override parameters from the command line:
 python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=0.01 hyperparameters.batch_size=128 hyperparameters.epochs=10
-
-
 
 ### Question 13
 
@@ -237,11 +249,12 @@ python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=
 We made use of config files. Whenever an experiment is run the following is happening: Hydra loads the configuration from config.yaml, W&B automatically logs all hyperparameters and metrics during training, and the trained model is saved as an artifact with its associated metadata. The exact configuration, model weights, random seed, and training logs are persisted to W&B for full experiment tracking. To reproduce an experiment one would have to retrieve the W&B run ID, then execute:
 
 python -m fashionmnist_classification_mlops.train \
-  hyperparameters.learning_rate=<logged_lr> \
-  hyperparameters.batch_size=<logged_batch_size> \
-  hyperparameters.epochs=<logged_epochs>
+ hyperparameters.learning_rate=<logged_lr> \
+ hyperparameters.batch_size=<logged_batch_size> \
+ hyperparameters.epochs=<logged_epochs>
 
 This ensures the exact same hyperparameters, data, and random seed are used, guaranteeing reproducible results.
+
 ### Question 14
 
 > **Upload 1 to 3 screenshots that show the experiments that you have done in W&B (or another experiment tracking** > **service of your choice). This may include loss graphs, logged images, hyperparameter sweeps etc. You can take** > **inspiration from [this figure](figures/wandb.png). Explain what metrics you are tracking and why they are** > **important.**
@@ -283,8 +296,7 @@ Finally, the API image serves the trained model through a FastAPI endpoint and c
 docker build -f dockerfiles/api.dockerfile -t fashionmnist-api .
 docker run -p 8080:8080 -e MODEL_URI=gs://mlops-project-484413-dvc/models/model.pth fashionmnist-api
 
-Link to dockerfiles: https://github.com/AlecRanjitkar/MLOPS-Project/blob/main/dockerfiles/train.dockerfile
-
+Link to one of the dockerfiles https://github.com/AlecRanjitkar/MLOPS-Project/blob/main/dockerfiles/train.dockerfile
 
 ### Question 16
 
@@ -365,7 +377,9 @@ We did not directly use Google Cloud Compute Engine virtual machines in this pro
 >
 > Answer:
 
---- question 22 fill here ---
+We did not manage to train our model in the cloud using Compute Engine or Vertex AI. The primary reason was that our Fashion-MNIST model is relatively lightweight and trains quickly on local hardware, including laptops with CPU or MPS acceleration. This made cloud-based training unnecessary from a computational perspective.
+
+Additionally, as a three member team working within a limited timeframe, we prioritized other critical MLOps components such as containerization, CI/CD pipelines, API deployment, and data versioning over cloud training infrastructure. We chose to train models locally and in GitHub Actions CI, which provided sufficient reproducibility for our use case.
 
 ## Deployment
 
@@ -406,14 +420,6 @@ We did not directly use Google Cloud Compute Engine virtual machines in this pro
 >
 > Answer:
 
-We did not perform unit testing and load testing of our API. However, we would implement it as follows:
-
-Unit Testing: We would use pytest with FastAPI's TestClient to verify that our endpoints return correct responses and handle errors properly.
-
-Load Testing: We would use tools like locust to simulate multiple concurrent users making requests to our API and measure response times, throughput, and identify bottlenecks.
-
-
-
 ### Question 26
 
 > **Did you manage to implement monitoring of your deployed model? If yes, explain how it works. If not, explain how** > **monitoring would help the longevity of your application.**
@@ -442,7 +448,7 @@ Load Testing: We would use tools like locust to simulate multiple concurrent use
 >
 > Answer:
 
-Group member s205427 was responsible for setting up and managing the Google Cloud infrastructure used in the project. During development, a total usage cost of approximately $7.33. 
+Group member s205427 was responsible for setting up and managing the Google Cloud infrastructure used in the project. During development, a total usage cost of approximately $7.33.
 The service costing the most was Cloud Run, as it was used to deploy and host our FastAPI-based inference service. Cloud Run handled container execution, request routing, and automatic scaling, which made it the most frequently used service during testing and deployment. Smaller portions of the cost came from Cloud Storage, which was used to store trained model artifacts and datasets, and Artifact Registry, which stored the Docker images built for training, evaluation, and deployment.
 Overall, working in the cloud was a positive experience. It enabled rapid experimentation, simplified deployment, and removed the need to manage virtual machines manually. The managed and serverless nature of the services allowed us to focus on building a reliable MLOps pipeline rather than maintaining infrastructure.
 
