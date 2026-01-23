@@ -211,8 +211,6 @@ The data changes workflow monitors DVC file changes and validates data integrity
 
 Link to one of the works: https://github.com/AlecRanjitkar/MLOPS-Project/actions/workflows/docker-build.yaml
 
---- question 11 fill here ---
-
 ## Running code and tracking experiments
 
 > In the following section we are interested in learning more about the experimental setup for running your code and
@@ -229,11 +227,19 @@ Link to one of the works: https://github.com/AlecRanjitkar/MLOPS-Project/actions
 >
 > Answer:
 
-We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings:
+We used Hydra to manage experiment configuration in a structured and reproducible way. A central configuration file `conf/config.yaml` defines default hyperparameters such as learning rate, batch size, and number of epochs. This allows experiments to be run consistently while still supporting easy overrides from the command line.
+
+To run an experiment with default settings:
+
+```bash
 python -m fashionmnist_classification_mlops.train
+```
 
 To override parameters from the command line:
+
+```bash
 python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=0.01 hyperparameters.batch_size=128 hyperparameters.epochs=10
+```
 
 ### Question 13
 
@@ -319,7 +325,7 @@ Link to one of the dockerfiles https://github.com/AlecRanjitkar/MLOPS-Project/bl
 
 Debugging methods were primarily collaborative in our group. We used a combination of print statements, Loguru logging output, and VS Code's integrated debugger to trace issues. For CI/CD failures, we examined GitHub Actions logs to identify problems with Docker builds, dependency installation, and test execution. When Docker builds initially timed out due to large PyTorch downloads, we debugged by analyzing build logs and ultimately created requirements-docker.txt with CPU only PyTorch.
 
-We did perform code profiling using Python's cProfile on our training pipeline. The profiling run revealed that data loading and forward passes dominated execution time, which was expected for our model size. 
+We did perform code profiling using Python's cProfile on our training pipeline. The profiling run revealed that data loading and forward passes dominated execution time, which was expected for our model size.
 
 ## Working in the cloud
 
