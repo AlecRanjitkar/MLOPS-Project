@@ -487,13 +487,11 @@ Here, <PATH_TO_LOCAL_IMAGE> refers to any image file available on the client mac
 >
 > Answer:
 
-We performed both basic unit testing and load testing of our API during the project.
+Yes, unit testing was performed for the API, while load testing was not conducted as part of the implementation, but a clear plan exists for how it would be done.
 
-For unit testing, we relied on FastAPI’s built-in testing utilities together with pytest. We tested individual endpoints such as /health and /predict by sending known inputs and verifying that the responses had the correct structure, status codes, and data types. These tests ensured that the API behaved correctly when the model was loaded, when it was unavailable, and when invalid inputs were provided.
+For unit testing, we used pytest together with FastAPI’s TestClient. The tests cover all main endpoints, including /, /health, /classes, /predict, /predict/batch, and /metrics. We tested both normal and edge cases, such as valid image predictions, invalid file uploads, batch predictions, and correct error handling when the model is not loaded (returning HTTP 503). To isolate the API layer, the model loading was mocked by overriding the MODEL_LOADED flag, ensuring fast and deterministic tests without loading the actual ML model.
 
-For load testing, we used Locust, an open-source load testing framework. We defined a Locust user that repeatedly sent image prediction requests to the /predict endpoint and gradually increased the number of concurrent users. The results showed that the service handled a moderate number of concurrent requests reliably on local hardware, with stable response times and no crashes. As expected, latency increased as concurrency rose, mainly due to CPU-bound model inference.
-
-Overall, this testing gave us confidence that the API is functionally correct and reasonably robust under load for a prototype deployment.
+Load testing was not executed, but it would be done using tools such as Locust or k6. The plan would be to simulate concurrent users sending prediction requests with image payloads, gradually increasing the request rate until latency or error rates become unacceptable. Metrics such as response time, throughput, error rate, and resource usage would be monitored to determine the API’s breaking point and scalability limits.
 
 ### Question 26
 
