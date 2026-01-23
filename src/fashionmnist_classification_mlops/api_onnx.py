@@ -1,8 +1,9 @@
 import io
 import time
+
 import numpy as np
 import onnxruntime as ort
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image
 from torchvision import transforms
 

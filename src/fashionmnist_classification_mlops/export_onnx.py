@@ -1,4 +1,5 @@
 import torch
+
 from fashionmnist_classification_mlops.model import FashionCNN
 
 MODEL_PATH = "models/model.pth"

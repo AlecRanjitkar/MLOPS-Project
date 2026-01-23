@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import os
+
 os.environ["SKIP_MODEL_LOAD"] = "1"
 
 import io
@@ -12,8 +14,6 @@ from PIL import Image
 
 import fashionmnist_classification_mlops.api as api_mod
 from fashionmnist_classification_mlops.api import app
-
-
 
 
 @pytest.fixture()
