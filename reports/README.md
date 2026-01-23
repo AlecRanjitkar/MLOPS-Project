@@ -124,6 +124,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 > _We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These_ > _concepts are important in larger projects because ... . For example, typing ..._
 >
 > Answer:
+
 We used Ruff for lintinng and formatting, with rules defined in the project configuration to ensure consistent code style and naming conventions. We also used Python type hints to document function inputs and outputs, improving code clarity and reducing the risk of misuse. Documentation was provided through docstrings in key functions and a project-level README describing how to run and understand the project. These concepts are important in larger projects because they improve readability, maintainability, and collaboration. For example, typing clarifies interfaces between components, while consistent formatting and documentation make it easier for other developers outside to work on the same codebase.
 
 ## Version control
@@ -141,7 +142,7 @@ We used Ruff for lintinng and formatting, with rules defined in the project conf
 > _In total we have implemented X tests. Primarily we are testing ... and ... as these the most critical parts of our_ > _application but also ... ._
 >
 > Answer:
-In total we have implemented 18 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
+In total we have implemented a total of 23 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
 
 ### Question 8
 
@@ -214,9 +215,11 @@ We did make use of DVC for versioning our Fashion-MNIST dataset. We tracked the 
 >
 > Answer:
 
-We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings: python -m fashionmnist_classification_mlops.train
+We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings: 
+python -m fashionmnist_classification_mlops.train
 
-To override parameters from the command line:python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=0.01 hyperparameters.batch_size=128 hyperparameters.epochs=10
+To override parameters from the command line:
+python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=0.01 hyperparameters.batch_size=128 hyperparameters.epochs=10
 
 
 
@@ -231,7 +234,7 @@ To override parameters from the command line:python -m fashionmnist_classificati
 >
 > Answer:
 
-We made use of config files. Whenever an experiment is run the following happens: Hydra loads the configuration from config.yaml, W&B automatically logs all hyperparameters and metrics during training, and the trained model is saved as an artifact with its associated metadata. The exact configuration, model weights, random seed, and training logs are persisted to W&B for full experiment tracking. To reproduce an experiment one would have to retrieve the W&B run ID, then execute:
+We made use of config files. Whenever an experiment is run the following is happening: Hydra loads the configuration from config.yaml, W&B automatically logs all hyperparameters and metrics during training, and the trained model is saved as an artifact with its associated metadata. The exact configuration, model weights, random seed, and training logs are persisted to W&B for full experiment tracking. To reproduce an experiment one would have to retrieve the W&B run ID, then execute:
 
 python -m fashionmnist_classification_mlops.train \
   hyperparameters.learning_rate=<logged_lr> \
@@ -439,7 +442,9 @@ Load Testing: We would use tools like locust to simulate multiple concurrent use
 >
 > Answer:
 
---- question 27 fill here ---
+Group member s205427 was responsible for setting up and managing the Google Cloud infrastructure used in the project. During development, a total usage cost of approximately $7.33. 
+The service costing the most was Cloud Run, as it was used to deploy and host our FastAPI-based inference service. Cloud Run handled container execution, request routing, and automatic scaling, which made it the most frequently used service during testing and deployment. Smaller portions of the cost came from Cloud Storage, which was used to store trained model artifacts and datasets, and Artifact Registry, which stored the Docker images built for training, evaluation, and deployment.
+Overall, working in the cloud was a positive experience. It enabled rapid experimentation, simplified deployment, and removed the need to manage virtual machines manually. The managed and serverless nature of the services allowed us to focus on building a reliable MLOps pipeline rather than maintaining infrastructure.
 
 ### Question 28
 
