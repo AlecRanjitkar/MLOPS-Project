@@ -1,7 +1,8 @@
+import io
+
 import requests
 import streamlit as st
 from PIL import Image
-import io
 
 API_URL = "http://localhost:8000/predict"
 

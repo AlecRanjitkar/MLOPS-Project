@@ -4,7 +4,7 @@ import io
 import os
 
 import numpy as np
-from locust import HttpUser, task, between
+from locust import HttpUser, between, task
 from PIL import Image
 
 

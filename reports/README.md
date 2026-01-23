@@ -211,8 +211,6 @@ The data changes workflow monitors DVC file changes and validates data integrity
 
 Link to one of the works: https://github.com/AlecRanjitkar/MLOPS-Project/actions/workflows/docker-build.yaml
 
---- question 11 fill here ---
-
 ## Running code and tracking experiments
 
 > In the following section we are interested in learning more about the experimental setup for running your code and
@@ -229,11 +227,19 @@ Link to one of the works: https://github.com/AlecRanjitkar/MLOPS-Project/actions
 >
 > Answer:
 
-We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings:
+We used Hydra to manage experiment configuration in a structured and reproducible way. A central configuration file `conf/config.yaml` defines default hyperparameters such as learning rate, batch size, and number of epochs. This allows experiments to be run consistently while still supporting easy overrides from the command line.
+
+To run an experiment with default settings:
+
+```bash
 python -m fashionmnist_classification_mlops.train
+```
 
 To override parameters from the command line:
+
+```bash
 python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=0.01 hyperparameters.batch_size=128 hyperparameters.epochs=10
+```
 
 ### Question 13
 
@@ -319,7 +325,7 @@ Link to one of the dockerfiles https://github.com/AlecRanjitkar/MLOPS-Project/bl
 
 Debugging methods were primarily collaborative in our group. We used a combination of print statements, Loguru logging output, and VS Code's integrated debugger to trace issues. For CI/CD failures, we examined GitHub Actions logs to identify problems with Docker builds, dependency installation, and test execution. When Docker builds initially timed out due to large PyTorch downloads, we debugged by analyzing build logs and ultimately created requirements-docker.txt with CPU only PyTorch.
 
-We did perform code profiling using Python's cProfile on our training pipeline. The profiling run revealed that data loading and forward passes dominated execution time, which was expected for our model size. 
+We did perform code profiling using Python's cProfile on our training pipeline. The profiling run revealed that data loading and forward passes dominated execution time, which was expected for our model size.
 
 ## Working in the cloud
 
@@ -404,7 +410,11 @@ Additionally, as a three member team working within a limited timeframe, we prio
 >
 > Answer:
 
---- question 23 fill here ---
+We did manage to write an API for our trained model using FastAPI. The API is defined in api.py and serves a trained FashionCNN model for inference. A lifespan context manager is used to load the model once at application startup, either from a local model.pth file or by downloading it from Google Cloud Storage using the MODEL_URI environment variable. This avoids reloading the model on every request and improves performance.
+
+The main /predict endpoint accepts image uploads via FastAPI’s UploadFile. Uploaded images are converted to PIL format and preprocessed using torchvision transforms, including grayscale conversion, resizing to 28×28, tensor conversion, and normalization. The processed image is passed through the model, and the output logits are converted to probabilities using softmax. The API returns the predicted class along with its confidence score.
+
+In addition, we implemented auxiliary endpoints such as /health for readiness checks, /metrics for basic monitoring, and /classes to list available Fashion-MNIST labels. The API is fully containerized with Docker and deployed to Google Cloud Run for scalable inference.
 
 ### Question 24
 
@@ -417,7 +427,31 @@ Additionally, as a three member team working within a limited timeframe, we prio
 >
 > Answer:
 
---- question 24 fill here ---
+We successfully deployed our API both locally and in the cloud. For local deployment, we wrapped our FastAPI application in a Docker container and tested it by running:
+
+```bash
+docker build -f dockerfiles/api.dockerfile -t fashionmnist-api .
+docker run -p 8080:8080 -v $(pwd)/models:/app/models fashionmnist-api
+```
+
+and it can be invoked the following way:
+
+```bash curl -X POST \
+ -F "file=@<PATH_TO_LOCAL_IMAGE>" \
+ http://localhost:8080/predict
+```
+
+This served the API at localhost:8080, allowing us to verify functionality before cloud deployment.
+
+For cloud deployment, we used Google Cloud Run, which automatically provisions serverless containers. Our CI/CD pipeline (GitHub Actions) builds the Docker image and pushes it to Google Container Registry (GHCR). Cloud Run then deploys the container with automatic scaling. The deployed API can be invoked using:
+
+```bash
+curl -X POST \
+ -F "file=@<PATH_TO_LOCAL_IMAGE>" \
+ https://fashionmnist-api-773196702268.europe-west1.run.app/predict
+```
+
+Here, <PATH_TO_LOCAL_IMAGE> refers to any image file available on the client machine. The API returns a JSON response containing the predicted Fashion-MNIST class and confidence score.
 
 ### Question 25
 

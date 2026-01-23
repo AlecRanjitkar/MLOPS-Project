@@ -30,8 +30,16 @@ DEVICE = torch.device("cpu")
 SKIP_MODEL_LOAD = os.getenv("SKIP_MODEL_LOAD", "0") == "1"
 
 CLASS_NAMES = [
-    "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
-    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot",
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot",
 ]
 
 transform = transforms.Compose(
@@ -128,6 +136,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"ERROR loading model: {e}")
         import traceback
+
         traceback.print_exc()
 
     _ensure_log_file_exists()
