@@ -157,7 +157,7 @@ We used Ruff for lintinng and formatting, with rules defined in the project conf
 >
 > Answer:
 
-In total we have implemented a total of 31 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
+In total we have implemented a total of 30 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
 
 ### Question 8
 

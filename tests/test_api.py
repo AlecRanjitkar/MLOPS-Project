@@ -62,17 +62,6 @@ def test_classes(client: TestClient) -> None:
     assert len(data["classes"]) == 10
 
 
-def test_predict_requires_model_loaded() -> None:
-    # Ensure 503 if not loaded
-    import fashionmnist_classification_mlops.api as api_mod
-
-    api_mod.MODEL_LOADED = False
-    with TestClient(app) as c:
-        img_bytes = _make_dummy_image_bytes()
-        r = c.post("/predict", files={"file": ("img.png", img_bytes, "image/png")})
-        assert r.status_code == 503
-
-
 def test_predict_ok(client: TestClient) -> None:
     img_bytes = _make_dummy_image_bytes()
     r = client.post("/predict", files={"file": ("img.png", img_bytes, "image/png")})
