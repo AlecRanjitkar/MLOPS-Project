@@ -45,7 +45,7 @@ transform = transforms.Compose(
         transforms.Grayscale(),
         transforms.Resize((28, 28)),
         transforms.ToTensor(),
-        transforms.Normalize((MEAN,), (STD,)), 
+        transforms.Normalize((MEAN,), (STD,)),
     ]
 )
 

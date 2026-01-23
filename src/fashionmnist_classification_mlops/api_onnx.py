@@ -3,11 +3,10 @@ import time
 
 import numpy as np
 import onnxruntime as ort
+import torch
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image
 from torchvision import transforms
-import torch
-
 
 app = FastAPI(title="Fashion-MNIST ONNX API")
 
@@ -35,7 +34,7 @@ transform = transforms.Compose(
         transforms.Grayscale(),
         transforms.Resize((28, 28)),
         transforms.ToTensor(),
-        transforms.Normalize((MEAN,), (STD,)), 
+        transforms.Normalize((MEAN,), (STD,)),
     ]
 )
 session = ort.InferenceSession("models/model.onnx", providers=["CPUExecutionProvider"])
@@ -65,4 +64,3 @@ async def predict(file: UploadFile = File(...)):
         "confidence": conf,
         "latency_ms": round((time.time() - start) * 1000, 2),
     }
-
