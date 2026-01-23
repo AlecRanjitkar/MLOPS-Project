@@ -124,8 +124,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 > _We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These_ > _concepts are important in larger projects because ... . For example, typing ..._
 >
 > Answer:
-
---- question 6 fill here ---
+We used Ruff for lintinng and formatting, with rules defined in the project configuration to ensure consistent code style and naming conventions. We also used Python type hints to document function inputs and outputs, improving code clarity and reducing the risk of misuse. Documentation was provided through docstrings in key functions and a project-level README describing how to run and understand the project. These concepts are important in larger projects because they improve readability, maintainability, and collaboration. For example, typing clarifies interfaces between components, while consistent formatting and documentation make it easier for other developers outside to work on the same codebase.
 
 ## Version control
 
@@ -142,8 +141,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 > _In total we have implemented X tests. Primarily we are testing ... and ... as these the most critical parts of our_ > _application but also ... ._
 >
 > Answer:
-
---- question 7 fill here ---
+In total we have implemented 18 tests. Primarily, we are testing the data preprocessing and model components, as these are the most critical parts of our application, but also the training utilities and helper functions. The tests ensure correct data handling, valid model outputs, and robust training behavior.
 
 ### Question 8
 
@@ -156,7 +154,9 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coverage of our project is 37% at the time of measurement. When the initial tests were implemented, the codebase was smaller, and additional functionality such as extended logging, experiment tracking, and auxiliary utilities was added afterward without corresponding tests. As a result, the coverage does not fully reflect the amount of testing performed on the core logic.
+
+Even if the code coverage were close to 100%, we would not consider the code to be error free. High coverage only indicates that lines of code have been executed during tests, not that the underlying logic is correct or that all edge cases are handled. In machine learning projects, it is often difficult to exhaustively test training loops, external dependencies, and logging behavior. A slightly lower coverage can provide greater flexibility, allowing faster iteration and experimentation.
 
 ### Question 9
 
@@ -169,7 +169,9 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 9 fill here ---
+During the project, we primarily worked by creating a new branch for each module or major task, such as data versioning, configuration management, CI setup, or deployment-related changes. Each branch allowed us to develop and test functionality in isolation without affecting the main branch. Once a task was completed and verified, the changes were merged into the main branch, ensuring that main always remained in a stable and working state.
+
+In addition, we often worked collaboratively on the same tasks from a single computer. This approach was chosen deliberately to maximize shared learning and discussion, allowing all group members to understand the design decisions, implementation details, and debugging process in depth. Even in these cases, we still followed a branching strategy to maintain a clear development history and reduce the risk of accidental errors in the main codebase.
 
 ### Question 10
 
@@ -181,8 +183,7 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 > _We did make use of DVC in the following way: ... . In the end it helped us in ... for controlling ... part of our_ > _pipeline_
 >
 > Answer:
-
---- question 10 fill here ---
+We did make use of DVC for versioning our Fashion-MNIST dataset. We tracked the processed directory containing preprocessed tensors (train_images.pt, test_images.pt, train_labels.pt, test_labels.pt, and stats.pt totaling 220MB) using a processed.dvc file. We configured DVC with Google Cloud Storage (gs://mlops-project-484413-dvc) as our remote storage backend. In the end it helped us in controlling the data distribution part of our pipeline by ensuring all team members could pull identical preprocessed data using dvc pull. This eliminated "works on my machine" issues and enabled our CI/CD pipeline to access the same versioned data during automated testing and Docker builds. DVC integration with GCS provided persistent cloud storage, making data accessible across local development and cloud deployment environments without bloating our Git repository.
 
 ### Question 11
 
@@ -213,7 +214,11 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 12 fill here ---
+We used Hydra for experiment configuration. Our main config file conf/config.yaml defines default hyperparameters. To run experiments with default settings: python -m fashionmnist_classification_mlops.train
+
+To override parameters from the command line:python -m fashionmnist_classification_mlops.train hyperparameters.learning_rate=0.01 hyperparameters.batch_size=128 hyperparameters.epochs=10
+
+
 
 ### Question 13
 
@@ -226,8 +231,14 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 13 fill here ---
+We made use of config files. Whenever an experiment is run the following happens: Hydra loads the configuration from config.yaml, W&B automatically logs all hyperparameters and metrics during training, and the trained model is saved as an artifact with its associated metadata. The exact configuration, model weights, random seed, and training logs are persisted to W&B for full experiment tracking. To reproduce an experiment one would have to retrieve the W&B run ID, then execute:
 
+python -m fashionmnist_classification_mlops.train \
+  hyperparameters.learning_rate=<logged_lr> \
+  hyperparameters.batch_size=<logged_batch_size> \
+  hyperparameters.epochs=<logged_epochs>
+
+This ensures the exact same hyperparameters, data, and random seed are used, guaranteeing reproducible results.
 ### Question 14
 
 > **Upload 1 to 3 screenshots that show the experiments that you have done in W&B (or another experiment tracking** > **service of your choice). This may include loss graphs, logged images, hyperparameter sweeps etc. You can take** > **inspiration from [this figure](figures/wandb.png). Explain what metrics you are tracking and why they are** > **important.**
@@ -252,7 +263,25 @@ From the cookiecutter template we filled out the `src/`, `data/`, `models/`, `re
 >
 > Answer:
 
---- question 15 fill here ---
+Docker was used extensively in our project to containerize all major stages of the machine learning pipeline and ensure reproducibility across environments. We developed three separate Docker images: one for model training, one for model evaluation, and one for serving predictions via a FastAPI application. Each image is built from a dedicated Dockerfile located in the dockerfiles/ directory and uses a shared dependency specification to ensure consistency.
+
+The training image encapsulates the full training logic and expects the processed dataset to be mounted at runtime. It can be run as:
+docker build -f dockerfiles/train.dockerfile -t fashionmnist-train .
+docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models fashionmnist-train
+
+This trains the model and stores the resulting weights in the mounted models/ directory.
+
+Similarly, the evaluation image loads the trained model and dataset to generate evaluation metrics and reports:
+docker build -f dockerfiles/evaluate.dockerfile -t fashionmnist-evaluate .
+docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/models:/app/models -v $(pwd)/reports:/app/reports fashionmnist-evaluate
+
+Finally, the API image serves the trained model through a FastAPI endpoint and can load the model either locally or from Google Cloud Storage:
+
+docker build -f dockerfiles/api.dockerfile -t fashionmnist-api .
+docker run -p 8080:8080 -e MODEL_URI=gs://mlops-project-484413-dvc/models/model.pth fashionmnist-api
+
+Link to dockerfiles: https://github.com/AlecRanjitkar/MLOPS-Project/blob/main/dockerfiles/train.dockerfile
+
 
 ### Question 16
 
@@ -374,7 +403,13 @@ We did not directly use Google Cloud Compute Engine virtual machines in this pro
 >
 > Answer:
 
---- question 25 fill here ---
+We did not perform unit testing and load testing of our API. However, we would implement it as follows:
+
+Unit Testing: We would use pytest with FastAPI's TestClient to verify that our endpoints return correct responses and handle errors properly.
+
+Load Testing: We would use tools like locust to simulate multiple concurrent users making requests to our API and measure response times, throughput, and identify bottlenecks.
+
+
 
 ### Question 26
 
