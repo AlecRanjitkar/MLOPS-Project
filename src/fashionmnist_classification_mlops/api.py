@@ -1,18 +1,14 @@
 from __future__ import annotations
 
-import csv
-import hashlib
 import io
 import os
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlparse
 
-import numpy as np
 import torch
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from google.cloud import storage
 from PIL import Image
 from torchvision import transforms
@@ -39,12 +35,17 @@ CLASS_NAMES = [
     "Ankle boot",
 ]
 
+stats = torch.load("data/processed/stats.pt")
+MEAN = stats["mean"]
+STD = stats["std"]
+
+# Then update the transform:
 transform = transforms.Compose(
     [
         transforms.Grayscale(),
         transforms.Resize((28, 28)),
         transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)),
+        transforms.Normalize((MEAN,), (STD,)), 
     ]
 )
 
@@ -54,28 +55,6 @@ model = FashionCNN().to(DEVICE)
 
 request_count = 0
 prediction_times: list[float] = []
-
-LOG_PATH = Path(os.getenv("PREDICTION_LOG_PATH", "monitoring/prediction_log.csv"))
-
-
-def _ensure_log_file_exists() -> None:
-    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    if not LOG_PATH.exists():
-        with open(LOG_PATH, "w", newline="") as f:
-            writer = csv.writer(f)
-            # drift wants numeric columns, so we log simple image stats + outputs
-            writer.writerow(
-                [
-                    "timestamp",
-                    "sha256",
-                    "mean",
-                    "std",
-                    "min",
-                    "max",
-                    "predicted_class",
-                    "confidence",
-                ]
-            )
 
 
 def _download_from_gcs(gs_uri: str, dest: Path) -> None:
@@ -138,28 +117,7 @@ async def lifespan(app: FastAPI):
 
         traceback.print_exc()
 
-    _ensure_log_file_exists()
     yield
-
-
-def extract_features(x: torch.Tensor) -> dict:
-    img = x.squeeze().cpu().numpy()
-    return {
-        "avg_brightness": float(np.mean(img)),
-        "contrast": float(np.std(img)),
-    }
-
-
-def log_prediction(features, pred_class, confidence):
-    file_exists = Path("prediction_log.csv").exists()
-
-    with open("prediction_log.csv", "a", newline="") as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["timestamp", "avg_brightness", "contrast", "predicted_class", "confidence"])
-        writer.writerow(
-            [datetime.utcnow().isoformat(), features["avg_brightness"], features["contrast"], pred_class, confidence]
-        )
 
 
 app = FastAPI(title="Fashion-MNIST Classifier API", lifespan=lifespan)
@@ -199,7 +157,7 @@ async def get_metrics():
 
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks()):
+async def predict(file: UploadFile = File(...)):
     global request_count
     request_count += 1
 
@@ -223,23 +181,6 @@ async def predict(file: UploadFile = File(...), background_tasks: BackgroundTask
         confidence = float(probs[0, pred_idx].item())
 
     prediction_times.append(time.time() - start_time)
-
-    features = extract_features(x)
-
-    background_tasks.add_task(log_prediction, features, CLASS_NAMES[pred_idx], confidence)
-    # simple numeric features for drift detection
-    arr = x.squeeze(0).cpu().numpy()
-    mean = float(arr.mean())
-    std = float(arr.std())
-    vmin = float(arr.min())
-    vmax = float(arr.max())
-
-    sha = hashlib.sha256(contents).hexdigest()
-    ts = datetime.now(timezone.utc).isoformat()
-
-    with open(LOG_PATH, "a", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow([ts, sha, mean, std, vmin, vmax, CLASS_NAMES[pred_idx], confidence])
 
     return {
         "predicted_class": CLASS_NAMES[pred_idx],

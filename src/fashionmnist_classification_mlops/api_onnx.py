@@ -6,6 +6,8 @@ import onnxruntime as ort
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image
 from torchvision import transforms
+import torch
+
 
 app = FastAPI(title="Fashion-MNIST ONNX API")
 
@@ -22,15 +24,20 @@ CLASS_NAMES = [
     "Ankle boot",
 ]
 
+
+stats = torch.load("data/processed/stats.pt")
+MEAN = stats["mean"]
+STD = stats["std"]
+
+# Then update the transform:
 transform = transforms.Compose(
     [
         transforms.Grayscale(),
         transforms.Resize((28, 28)),
         transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)),
+        transforms.Normalize((MEAN,), (STD,)), 
     ]
 )
-
 session = ort.InferenceSession("models/model.onnx", providers=["CPUExecutionProvider"])
 input_name = session.get_inputs()[0].name
 
@@ -58,3 +65,4 @@ async def predict(file: UploadFile = File(...)):
         "confidence": conf,
         "latency_ms": round((time.time() - start) * 1000, 2),
     }
+
